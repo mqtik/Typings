@@ -14,7 +14,6 @@ import { API_URL, PORT_API_DIRECT, PORT_API } from 'react-native-dotenv';
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 
-
 /**
  * Screens
  * Navigation
@@ -42,7 +41,15 @@ const Routes = createStackNavigator({
         screen: SignedIn,
         navigationOptions: {
              headerLeft: null,
-             title: 'Typings'
+             title: 'Typings',
+             gesturesEnabled: false,
+             headerStyle: {
+              backgroundColor: '#333',
+               },
+             headerTintColor: '#fff',
+             headerTitleStyle: {
+               fontWeight: '200',
+              },
        }
     }
 }, {initialRouteName: initRoute});
