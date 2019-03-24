@@ -10,10 +10,10 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground} from 'react-native';
 import Icon from 'react-native-fa-icons';
 import PouchDB from 'pouchdb-react-native'
-import PouchDBAuth from 'pouchdb-authentication'
+import APIAuth from 'pouchdb-authentication'
 import Toast, {DURATION} from 'react-native-easy-toast'
 import { API_URL, PORT_API_DIRECT, PORT_API } from 'react-native-dotenv'
-PouchDB.plugin(PouchDBAuth)
+PouchDB.plugin(APIAuth)
 let url = "http://mqserv.com";
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 
@@ -57,7 +57,7 @@ export default class SignedOut extends Component<Props> {
             // nobody's logged in
           } else {
             Go.navigate("SignedIn");
-                        // response.userCtx.name is the current user
+            // response.userCtx.name is the current user
                         
           }
            
@@ -87,9 +87,9 @@ export default class SignedOut extends Component<Props> {
             return responseJson.movies;
         })*/
          
-          fetch(API_URL+':'+PORT_API+'/u/'+this.state.auth.toLowerCase()+'/boolean')
+          fetch(API_URL+':'+PORT_API+'/users/'+this.state.auth.toLowerCase()+'/boolean')
         .then((response) => {
-
+          console.log("Resp user", response)
           if(response._bodyInit == "true"){
               this.setState({color: '#36ca41'});
               this.refs.toast.show('The username exist. \n If it\'s yours, type your password', 2000);

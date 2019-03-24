@@ -15,6 +15,8 @@ react-native link rn-splash-screen
 
 react-native link react-native-linear-gradient
 
+react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
+
 # Clean Install
 npm start -- --reset-cache
 
@@ -32,6 +34,12 @@ I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbo
  - Anytime change launch screen using one line commend. 
 
 
+
+## Errors
+
+	- No bundle URL present.
+		Run: 
+			rm -rf ios/build/; kill $(lsof -t -i:8081); react-native run-ios
 ## Requirements
 
  - node >= 6

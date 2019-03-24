@@ -40,7 +40,8 @@ const Routes = createStackNavigator({
     SignedIn:{
         screen: SignedIn,
         navigationOptions: {
-             headerLeft: null,
+              header: null
+             /*headerLeft: null,
              title: 'Typings',
              gesturesEnabled: false,
              headerStyle: {
@@ -49,7 +50,7 @@ const Routes = createStackNavigator({
              headerTintColor: '#fff',
              headerTitleStyle: {
                fontWeight: '200',
-              },
+              },*/
        }
     }
 }, {initialRouteName: initRoute});

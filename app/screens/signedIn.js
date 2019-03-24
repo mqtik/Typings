@@ -10,9 +10,10 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView } from 'react-native';
 import Icon from 'react-native-fa-icons';
 import PouchDB from 'pouchdb-react-native'
-import PouchDBAuth from 'pouchdb-authentication'
+import APIAuth from 'pouchdb-authentication'
+import APIFind from 'pouchdb-find'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import { API_URL, PORT_API_DIRECT, PORT_API } from 'react-native-dotenv'
+import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
@@ -20,14 +21,18 @@ import SliderEntry from '../components/SliderEntry';
 import styles, { colors } from '../styles/index.style';
 import { ENTRIES1, ENTRIES2 } from '../static/entries';
 import { scrollInterpolators, animatedStyles } from '../utils/animations';
-import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
+import { createBottomTabNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
+import DocScreen from './routes/docScreen.js';
 
-PouchDB.plugin(PouchDBAuth)
-let url = "http://mqserv.com";
+PouchDB.plugin(APIAuth);
+PouchDB.plugin(APIFind);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
+let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
+let APILocal = PouchDB(LOCAL_DB_NAME);
+
 const SLIDER_1_FIRST_ITEM = 1;
 const IS_ANDROID = Platform.OS === 'android';
-
+console.log("path", API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS)
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -36,7 +41,8 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-type Props = {};
+type Props = { navigation: Function }
+
 
 
 /*  db.sync('https://'userID':'userPASS'@'serverIP':6984/DBname', {
@@ -50,11 +56,47 @@ type Props = {};
     });
   }*/
 
-  export default class SignedIn extends React.Component {
+export default class SignedIn extends React.Component {
+  constructor(props) {
+      super(props)
+   }
     render() {
+      const HomeNavigator = createStackNavigator({
+                        Explore:{
+                            screen: ExploreScreen,
+                            navigationOptions: {
+                                 headerLeft: null,
+                                 title: 'Typings',
+                                 gesturesEnabled: false,
+                                 headerStyle: {
+                                  backgroundColor: '#333',
+                                   },
+                                 headerTintColor: '#fff',
+                                 headerTitleStyle: {
+                                   fontWeight: '200',
+                                  },
+                           }
+                        },
+                        Details:{
+                            screen: DocScreen,
+                            navigationOptions: {
+                                 title: 'Details',
+                                 gesturesEnabled: false,
+                                 headerStyle: {
+                                  backgroundColor: '#333',
+                                   },
+                                 headerTintColor: '#fff',
+                                 headerTitleStyle: {
+                                   fontWeight: '200',
+                                  },
+                           }
+                        }
+                    }, {initialRouteName: 'Explore'});
+
+                    const WrapHomeNavigator = createAppContainer(HomeNavigator);
         const TabNavigation = createBottomTabNavigator({
             Library: {
-             screen: ExploreScreen,
+             screen: WrapHomeNavigator,
                  navigationOptions: {
                     tabBarLabel:"Explore",
                     tabBarIcon: ({ tintColor }) => (
@@ -82,13 +124,16 @@ type Props = {};
              }
         },{
             swipeEnabled: true,
-  animationEnabled: true,
-  tabBarOptions: {
-    activeBackgroundColor: '#333',
-    inactiveBackgroundColor: '#111',
-    activeTintColor: '#fff',
-    inactiveTintColor: '#fff'
-  },
+            animationEnabled: true,
+            tabBarOptions: {
+              activeBackgroundColor: '#111',
+              inactiveBackgroundColor: '#111',
+              activeTintColor: '#fff',
+              inactiveTintColor: '#666',
+              style: {
+                backgroundColor: '#111',
+              }
+            }
         });
         const MainNavigator = createAppContainer(TabNavigation);
         // return (
@@ -107,7 +152,7 @@ class CreatorsScreen extends Component<Props>{
         return(
             <View>
                 <Text>
-                    AuthScreen Works!
+                    Creators Screen
                 </Text>
             </View>
         );
@@ -119,31 +164,104 @@ class SettingsScreen extends Component<Props>{
         return(
             <View>
                 <Text>
-                    Hello this is working!
+                    Settings Screen
                 </Text>
             </View>
         );
     }
 }
+
 class ExploreScreen extends Component<Props> {
    constructor (props) {
         super(props);
+
         this.state = {
-            slider1ActiveSlide: SLIDER_1_FIRST_ITEM
+            slider1ActiveSlide: SLIDER_1_FIRST_ITEM,
+            indexName: null,
+            docs: null
         };
+        this._onDocPress = this._onDocPress.bind(this);
+        this._renderDocs = this._renderDocs.bind(this);
+    }
+    componentDidMount(){
+      // Create Index
+      this._syncDocs();
+      this._renderDocs();
+        console.log("this props signed", this.props)
     }
 
+    _syncDocs = event => {
+      APIBooks.replicate.to(APILocal, {
+        filter: function (doc) {
+          return doc.public === true;
+        }
+      }).then(res => {
+        console.log("SYNCED!", res)
+          APILocal.allDocs({
+            include_docs: true,
+            attachments: true
+          }).then(result => {
+            console.log("ALL DOCS")
+            console.log(result);
+           
+          }).catch(err => {
+            console.log(err);
+          
+          });
+      });
+      
+      console.log("Synced!")
+    }
+    _renderDocs = event => {
+        APIBooks.createIndex({
+                  index: {
+                    ddoc: 'BooksIndex',
+                    fields: ['_id', 'title', 'description', 'public', 'author', 'language', 'published_at', 'created_at', 'updated_at', 'path', 'cover']
+                  }
+                }).then(result => {
+                  console.log("index result", result.id)
+                   APIBooks.find({
+                        selector: {_id: {"$gte": null}, public: {'$exists': true}},
+                        fields: ['_id', 'title', 'description', 'public', 'author', 'language', 'published_at', 'created_at', 'updated_at', 'path', 'cover'],
+                        use_index: result.id
+                    }).then(res => {
+                        //console.log('find - result ' + result);
+                        console.log(JSON.stringify(res));
+
+                       // console.log('JSON' + JSON.stringify(result, undefined, 2));
+
+                        console.log(res);
+                        this.setState({docs: res.docs})
+
+                    }).catch(err => {
+                        console.log('find - err ', err);
+                    });
+
+                  
+                }).catch(err => {
+                  // ouch, an error
+                  console.log("The index had a problem creating", errIndex);
+                });
+    }
+
+    _onDocPress  = () => {
+      this.props.navigation.navigate('Settings');
+    }
     _renderItem ({item, index}) {
-        return <SliderEntry data={item} even={(index + 1) % 2 === 0} />;
+        return <SliderEntry data={item} even={(index + 1) % 2 === 0}/>;
     }
 
-    _renderItemWithParallax ({item, index}, parallaxProps) {
+
+    _renderItemWithParallax = ({item, index}, parallaxProps) => {
+      console.log("send props!", this.props)
         return (
             <SliderEntry
               data={item}
               even={(index + 1) % 2 === 0}
               parallax={true}
               parallaxProps={parallaxProps}
+              navigation={this.props.navigation}
+
             />
         );
     }
@@ -157,15 +275,18 @@ class ExploreScreen extends Component<Props> {
     }
 
     mainExample (number, title) {
-        const { slider1ActiveSlide } = this.state;
-
+        const { slider1ActiveSlide, docs } = this.state;
+        if(this.state.docs && this.state.docs.length){
+                //console.log("Docs!", docs)
+                //console.log("docs length", this.state.docs.length)
+              
         return (
             <View style={styles.exampleContainer}>
                 <Text style={styles.title}>{`Mas leídos - ${number}`}</Text>
                 <Text style={styles.subtitle}>{title}</Text>
                 <Carousel
                   ref={c => this._slider1Ref = c}
-                  data={ENTRIES1}
+                  data={this.state.docs}
                   renderItem={this._renderItemWithParallax}
                   sliderWidth={sliderWidth}
                   itemWidth={itemWidth}
@@ -184,7 +305,7 @@ class ExploreScreen extends Component<Props> {
                   onSnapToItem={(index) => this.setState({ slider1ActiveSlide: index }) }
                 />
                 <Pagination
-                  dotsLength={ENTRIES1.length}
+                  dotsLength={this.state.docs.length}
                   activeDotIndex={slider1ActiveSlide}
                   containerStyle={styles.paginationContainer}
                   dotColor={'rgba(255, 255, 255, 0.92)'}
@@ -197,6 +318,7 @@ class ExploreScreen extends Component<Props> {
                 />
             </View>
         );
+      }
     }
 
     momentumExample (number, title) {

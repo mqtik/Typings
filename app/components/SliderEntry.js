@@ -3,22 +3,27 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import PropTypes from 'prop-types';
 import { ParallaxImage } from 'react-native-snap-carousel';
 import styles from '../styles/SliderEntry.style';
+import { API_URL, API_STATIC, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME } from 'react-native-dotenv'
 
+type Props = { navigation: Function, onDocPress: Function }
 export default class SliderEntry extends Component {
-
+   constructor(props) {
+        super(props);
+    }
     static propTypes = {
         data: PropTypes.object.isRequired,
         even: PropTypes.bool,
         parallax: PropTypes.bool,
-        parallaxProps: PropTypes.object
+        parallaxProps: PropTypes.object,
+        navigation: PropTypes.any
     };
 
     get image () {
-        const { data: { illustration }, parallax, parallaxProps, even } = this.props;
-
+        const { data: { cover }, parallax, parallaxProps, even } = this.props;
+        //console.log("Cover!", API_STATIC+'/covers/'+cover);
         return parallax ? (
             <ParallaxImage
-              source={{ uri: illustration }}
+              source={{ uri: API_STATIC+'/covers/'+cover }}
               containerStyle={[styles.imageContainer, even ? styles.imageContainerEven : {}]}
               style={styles.image}
               parallaxFactor={0.35}
@@ -28,18 +33,24 @@ export default class SliderEntry extends Component {
             />
         ) : (
             <Image
-              source={{ uri: illustration }}
+              source={{ uri: API_STATIC+'/covers/'+cover }}
               style={styles.image}
             />
         );
     }
 
-    render () {
-        const { data: { title, subtitle }, even } = this.props;
 
+    onDocPress = (doc) => {
+      this.props.navigation.navigate('Details',{
+                                        dataDoc: doc
+                                      });
+   }
+
+    render () {
+        const { data: { title, description }, even } = this.props;
         const uppercaseTitle = title ? (
             <Text
-              style={[styles.title, even ? styles.titleEven : {}]}
+              style={styles.title}
               numberOfLines={2}
             >
                 { title.toUpperCase() }
@@ -50,20 +61,20 @@ export default class SliderEntry extends Component {
             <TouchableOpacity
               activeOpacity={1}
               style={styles.slideInnerContainer}
-              onPress={() => { alert(`You've clicked '${title}'`); }}
+              onPress={() => { this.onDocPress(this.props);  }}
               >
                 <View style={styles.shadow} />
-                <View style={[styles.imageContainer, even ? styles.imageContainerEven : {}]}>
+                <View style={styles.imageContainer}>
                     { this.image }
-                    <View style={[styles.radiusMask, even ? styles.radiusMaskEven : {}]} />
+                    <View style={styles.radiusMask} />
                 </View>
-                <View style={[styles.textContainer, even ? styles.textContainerEven : {}]}>
+                <View style={styles.textContainer}>
                     { uppercaseTitle }
                     <Text
-                      style={[styles.subtitle, even ? styles.subtitleEven : {}]}
+                      style={styles.description}
                       numberOfLines={2}
                     >
-                        { subtitle }
+                        { description }
                     </Text>
                 </View>
             </TouchableOpacity>
