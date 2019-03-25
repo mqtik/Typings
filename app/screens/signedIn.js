@@ -23,6 +23,7 @@ import { ENTRIES1, ENTRIES2 } from '../static/entries';
 import { scrollInterpolators, animatedStyles } from '../utils/animations';
 import { createBottomTabNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
 import DocScreen from './routes/docScreen.js';
+import ReaderScreen from './routes/readerScreen.js';
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
@@ -81,6 +82,20 @@ export default class SignedIn extends React.Component {
                             screen: DocScreen,
                             navigationOptions: {
                                  title: 'Details',
+                                 gesturesEnabled: false,
+                                 headerStyle: {
+                                  backgroundColor: '#333',
+                                   },
+                                 headerTintColor: '#fff',
+                                 headerTitleStyle: {
+                                   fontWeight: '200',
+                                  },
+                           }
+                        },
+                        Reader:{
+                            screen: ReaderScreen,
+                            navigationOptions: {
+                                 title: 'Reader',
                                  gesturesEnabled: false,
                                  headerStyle: {
                                   backgroundColor: '#333',

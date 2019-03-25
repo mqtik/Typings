@@ -3,6 +3,13 @@ package com.typings;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.RNFetchBlob.RNFetchBlobPackage;
+import com.RNFetchBlob.RNFetchBlobPackage;
+import com.horcrux.svg.SvgPackage;
+import com.reactnativecomponent.splashscreen.RCTSplashScreenPackage;
+import com.github.yamill.orientation.OrientationPackage;
+import com.rnziparchive.RNZipArchivePackage;
+import com.futurepress.staticserver.FPStaticServerPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.mehcode.reactnative.splashscreen.SplashScreenPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -26,6 +33,13 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNFetchBlobPackage(),
+            new RNFetchBlobPackage(),
+            new SvgPackage(),
+            new RCTSplashScreenPackage(),
+            new OrientationPackage(),
+            new RNZipArchivePackage(),
+            new FPStaticServerPackage(),
             new LinearGradientPackage(),
             new SplashScreenPackage(),
             new RNGestureHandlerPackage()

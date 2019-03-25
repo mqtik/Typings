@@ -25,7 +25,9 @@
     "react-native-smart-splash-screen": "^2.3.5",
     "react-native-snap-carousel": "^3.7.5",
     "react-native-svg": "^8.0.10",
+    "react-native-wkwebview-reborn": "^2.0.0",
     "react-navigation": "^3.0.9",
+    "rn-fetch-blob": "^0.10.15",
     "rn-splash-screen": "^5.2.0"
   },
   "devDependencies": {

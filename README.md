@@ -18,7 +18,9 @@ react-native link react-native-linear-gradient
 react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
 
 # Clean Install
+lsof -ti :8081 | xargs kill -9
 npm start -- --reset-cache
+
 
 # Run
 react-native run-ios

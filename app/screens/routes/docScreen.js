@@ -36,9 +36,15 @@ export default class DocScreen extends Component<Props>{
           this.setState({ isLoading: false })
         });
     }
+    onReadPress = () => {
+        let doc = this.props.navigation.getParam('dataDoc', false);
+        console.log("doc", doc)
+        this.props.navigation.navigate('Reader',{
+                                        dataDoc: doc
+                                      });
+   }
     render(){
         const {data, isLoading} = this.state;
-      console.log("this props render profile!", this.props.navigation.getParam('dataDoc', false))
         return(
 
             <ScrollView>
@@ -60,7 +66,7 @@ export default class DocScreen extends Component<Props>{
                         </ImageBackground>
                         )}
 
-                <TouchableOpacity style={styles.readDoc}> 
+                <TouchableOpacity style={styles.readDoc} onPress={() => { this.onReadPress(this.props);  }}> 
                  <Icon name="eye" style={styles.readDocIcon} /> 
                  <Icon name="circle-o" style={styles.readDocIconCircle} /> 
                         <Text style={{color: '#e89ee5', fontSize: 20, fontWeight: '500', textAlign: 'center', margin: 13, marginLeft: 30}}>
