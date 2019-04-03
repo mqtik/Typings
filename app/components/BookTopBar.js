@@ -63,7 +63,17 @@ const styles = StyleSheet.create({
   backButton: {
     width: 34,
     height: 34,
-    margin: 20,
+    margin: 16,
+    flex: 1,
+    display: 'flex',
+    alignItems:'center',
+    justifyContent:'center',
+    flexDirection: 'row'
+  },
+  NextPrevButton: {
+    width: 20,
+    height: 34,
+    margin: 16,
     flex: 1,
     display: 'flex',
     alignItems:'center',
@@ -136,13 +146,27 @@ class TopBar extends Component {
       <Animated.View style={[styles.header, { opacity: this.state.fadeAnim }]}>
         <TouchableOpacity style={styles.backButton}
           onPress={this.props.onLeftButtonPressed}>
-          <Icon name="bars" size={40} />
+          <Icon name="map-signs" style={{fontSize: 20}} />
         </TouchableOpacity>
-        <Text style={styles.title}>{this.props.title}</Text>
+        <Text style={styles.title}>
+          {this.props.navigation.getParam('Location', '')}
+        </Text>
+
+        <TouchableOpacity style={styles.NextPrevButton}
+          onPress={this.props.onFontSmaller}>
+          <Icon name="minus-circle" style={{fontSize: 20}} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.NextPrevButton}
+          onPress={this.props.onFontBigger}>
+          <Icon name="plus-circle" style={{fontSize: 20}} />
+        </TouchableOpacity>
+        {/*
         <TouchableOpacity style={styles.backButton}
           onPress={this.props.onRightButtonPressed}>
           <Icon name="lightbulb-o" size={40} />
         </TouchableOpacity>
+        */}
       </Animated.View>
     );
   }

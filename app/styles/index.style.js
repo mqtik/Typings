@@ -3,8 +3,9 @@ import { StyleSheet } from 'react-native';
 export const colors = {
     black: '#1a1917',
     gray: '#888888',
-    background1: '#B721FF',
-    background2: '#21D4FD'
+    background1: '#1a1917',
+    background2: '#B721FF',
+    white: '#ffffff'
 };
 
 export default StyleSheet.create({
@@ -66,5 +67,11 @@ export default StyleSheet.create({
         height: 8,
         borderRadius: 4,
         marginHorizontal: 8
-    }
+    },
+    indicator: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 80
+      }
 });

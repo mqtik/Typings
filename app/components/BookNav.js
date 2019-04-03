@@ -95,7 +95,7 @@ class Nav extends Component<{}> {
             <Text style={styles.headerTitle}>Table of Contents</Text>
             <TouchableOpacity style={styles.backButton}
               onPress={() => this.hide()}>
-              <Icon name="close" size={34} />
+              <Icon name="times-circle" style={{fontSize: 30, color: '#999'}} />
             </TouchableOpacity>
           </View>
           <FlatList
@@ -174,31 +174,25 @@ const styles = StyleSheet.create({
     top: 20,
     left: 0,
     right: 0,
-    ...Platform.select({
-      ios: {
-        fontFamily: "Baskerville",
-      },
-      android: {
-        fontFamily: "serif"
-      },
-    }),
+  
   },
   header: {
-    backgroundColor: "#cdcdcd",
+    backgroundColor: "#fff",
     paddingTop: 0,
-    top: 20,
+    top: 30,
     ...Platform.select({
       ios: {
-        height: 64,
+        height: 84,
       },
       android: {
-        height: 54,
+        height: 84,
       },
     }),
     right: 0,
     left: 0,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor:"#000",
+    borderBottomColor:"#eaeaea",
   },
   backButton: {
     width: 130,

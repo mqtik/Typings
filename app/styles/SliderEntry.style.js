@@ -41,11 +41,16 @@ export default StyleSheet.create({
         flex: 1,
         marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
         backgroundColor: 'white',
-        borderTopLeftRadius: entryBorderRadius,
-        borderTopRightRadius: entryBorderRadius
+        borderRadius: entryBorderRadius,
+        resizeMode: "stretch"
     },
     imageContainerEven: {
-        backgroundColor: colors.black
+        backgroundColor: colors.black,
+        flex: 1,
+        marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
+        backgroundColor: 'white',
+        borderRadius: entryBorderRadius,
+        resizeMode: "stretch"
     },
     image: {
         ...StyleSheet.absoluteFillObject,
@@ -61,25 +66,29 @@ export default StyleSheet.create({
         left: 0,
         right: 0,
         height: entryBorderRadius,
-        backgroundColor: 'white'
+        borderRadius: 8,
+        backgroundColor: 'transparent'
     },
     radiusMaskEven: {
-        backgroundColor: colors.black
+        backgroundColor: colors.white
     },
     textContainer: {
         justifyContent: 'center',
-        paddingTop: 20 - entryBorderRadius,
-        paddingBottom: 20,
-        paddingHorizontal: 16,
-        backgroundColor: 'white',
-        borderBottomLeftRadius: entryBorderRadius,
-        borderBottomRightRadius: entryBorderRadius
+        //paddingTop: 20 - entryBorderRadius,
+        //paddingBottom: 20,
+        //paddingHorizontal: 16,
+        backgroundColor: 'transparent',
+        color: 'white',
+        position: 'absolute',
+        padding: 10,
+        borderRadius: 8,
+          bottom:0
     },
     textContainerEven: {
-        backgroundColor: colors.black
+        backgroundColor: colors.white
     },
     title: {
-        color: colors.black,
+        color: colors.white,
         fontSize: 13,
         fontWeight: 'bold',
         letterSpacing: 0.5
@@ -95,5 +104,10 @@ export default StyleSheet.create({
     },
     subtitleEven: {
         color: 'rgba(255, 255, 255, 0.7)'
-    }
+    },
+    contentContainer: {
+        borderRadius: 7,
+        flex: 1,
+        justifyContent: 'flex-end',
+      },
 });

@@ -7,15 +7,21 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground} from 'react-native';
+import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ActivityIndicator} from 'react-native';
 import Icon from 'react-native-fa-icons';
 import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
+import APIFind from 'pouchdb-find'
+import APIUpsert from 'pouchdb-upsert'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import { API_URL, PORT_API_DIRECT, PORT_API } from 'react-native-dotenv'
+import { API_URL, PORT_API_DIRECT, PORT_API, SETTINGS_LOCAL_DB_NAME, DB_BOOKS, LOCAL_DB_NAME } from 'react-native-dotenv'
 PouchDB.plugin(APIAuth)
-let url = "http://mqserv.com";
+PouchDB.plugin(APIFind);
+PouchDB.plugin(APIUpsert);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
+let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
+let APILocal = PouchDB(LOCAL_DB_NAME);
+let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
 
 
 
@@ -41,7 +47,8 @@ export default class SignedOut extends Component<Props> {
          placeholder: 'Username',
          showPassword: false,
          color: 'red',
-         exist: 'false'
+         exist: 'false',
+         isLoading: true
       }
      
 
@@ -50,17 +57,49 @@ export default class SignedOut extends Component<Props> {
       // do stuff while splash screen is shown
         // After having done stuff (such as async tasks) hide the splash screen
         let Go = this.props.navigation;
-            API.getSession(function (err, response) {
-          if (err) {
-            // network error
-          } else if (!response.userCtx.name) {
-            // nobody's logged in
-          } else {
-            Go.navigate("SignedIn");
-            // response.userCtx.name is the current user
-                        
-          }
-           
+        
+        APILocalSettings.get('UserSettings')
+        .then(res => {
+          console.log("User settings!!", res);
+        })
+        .catch(err => {
+          console.log("There's no user logged in!", err)
+        })
+            API.getSession((err, response) => {
+
+                if (err) {
+                  // network error
+                } else if (!response.userCtx.name) {
+                  // nobody's logged in
+                } else {
+                  API.getUser(response.userCtx.name).then(res => {
+                    console.log("Get user from API", res)
+                    APILocalSettings.upsert('UserSettings', doc => {
+                     console.log("User settings logged", res.nombre, doc)
+                      
+                        doc.logged_in = true;
+                        doc.username = res.name;
+                        doc.nombre = res.nombre;
+                        doc.gender = res.gender;
+                        doc.allow_push_notifications = res.allow_push_notifications;
+                      
+                      return doc;
+                    }).then((res) => {
+                      console.log("User settings saved!", res)
+                      APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
+                      Go.navigate("SignedIn");
+                      // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                    }).catch((error) => {
+                      console.log("User settings error on saving", error)
+                      // error
+                    });
+
+                  }).catch(err => { console.log("Something went wrong getting the user")})
+                  console.log("Get user session", response)
+                  // response.userCtx.name is the current user
+                   
+                }
+           this.setState({ isLoading: false })
           console.log(response,err)
         });
     }
@@ -180,7 +219,15 @@ export default class SignedOut extends Component<Props> {
 
   render() {
    
-
+    if (this.state.isLoading == true) {
+      return (
+        <ActivityIndicator
+            style={styles.indicator}
+            color="#000"
+            size="large"
+          />
+        )
+    } else {
     return (
       
 
@@ -228,6 +275,7 @@ export default class SignedOut extends Component<Props> {
       </View>
 
     );
+    }
   }
 }
  
@@ -317,5 +365,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOpacity: 1,
     width: '90%'
+  },
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 80
   }
 });

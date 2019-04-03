@@ -6,16 +6,12 @@ Clone repository
 # Install
 npm install
 
-react-native link react-native-gesture-handler
-
-
-npm install --save rn-splash-screen
-
-react-native link rn-splash-screen
-
-react-native link react-native-linear-gradient
-
-react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
+# Link to native code
+1. react-native link react-native-gesture-handler
+2. react-native link rn-splash-screen
+3. react-native link react-native-linear-gradient
+4. react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
+5. react-native link react-native-dialogs
 
 # Clean Install
 lsof -ti :8081 | xargs kill -9
@@ -28,6 +24,18 @@ react-native run-ios
 react-native run-android
 
 
+## Errors
+
+	- No bundle URL present.
+		Run: 
+			rm -rf ios/build/; lsof -ti :8081 | xargs kill -9; react-native run-ios
+
+	- React Native Settings
+		Go to react-native-settings under node_modules folder, and change its .JSX extensions to .JS
+
+
+
+
 # Splashscreen & icon
 I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbox) for applying launch screen or main icon using on react-native. It is more simple and easy to use through cli as react-native.
 
@@ -36,12 +44,6 @@ I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbo
  - Anytime change launch screen using one line commend. 
 
 
-
-## Errors
-
-	- No bundle URL present.
-		Run: 
-			rm -rf ios/build/; kill $(lsof -t -i:8081); react-native run-ios
 ## Requirements
 
  - node >= 6
@@ -50,7 +52,7 @@ I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbo
 
 ## Install
  1. Install generator-rn-toolbox and yo
- 2. `npm install -g yo generator-rn-toolbox`
+ 2. `npm install -g yo `
  3. Install imagemagick
 `brew install imagemagick`
  4. Apply splash screen on iOS
@@ -63,6 +65,18 @@ I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbo
 
 
 That's all. :) 
+
+
+
+## Android
+
+1. DEX Error on Compile 
+	Go to *android/build.gradle*
+	
+	On *defaultConfig* {} (where is the targetSdk, compileSdk, etc.),
+	 place this line:
+	 `multiDexEnabled = true`
+
 
 [Source][1]
 

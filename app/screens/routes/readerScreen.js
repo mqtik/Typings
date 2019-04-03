@@ -20,12 +20,32 @@ let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME);
 
-export default class ReaderScren extends Component<Props>{
+export default class ReaderScreen extends Component<Props>{
+      static navigationOptions = ({ navigation }) => {
+          console.log("navigation options!")
+        return {
+          title: navigation.getParam('Title', 'Reading...'),
+          //Default Title of ActionBar
+            //Background color of ActionBar
+          headerRight: (
+              <TouchableOpacity onPress={() => this._nav.show()}>
+                  <Text>
+                    {navigation.getParam('Location', '5')}
+                  </Text>
+              </TouchableOpacity>
+            ),
+          //Text color of ActionBar
+        };
+      };
     constructor (props) {
         super(props);
+
         
         let doc = this.props.navigation.getParam('dataDoc', false);
         console.log("Starting!", API_STATIC+"/epub/"+doc.data.path)
+        console.log("    Title!", this.props.navigation.getParam('dataDoc', false).data.title)
+
+
         this.state = {
             title: doc.data.title,
             author: doc.data.author,
@@ -35,19 +55,30 @@ export default class ReaderScren extends Component<Props>{
             _id: doc.data._id,
             isLoading: true,
             flow: "paginated", // paginated || scrolled-continuous
-          location: 6,
-          url: API_STATIC+"/epub/"+doc.data.path,
-          src: "",
-          origin: "",
-          title: "",
-          toc: [],
-          showBars: true,
-          showNav: false,
-          sliderDisabled: true
+            location: 6,
+            url: API_STATIC+"/epub/"+doc.data.path,
+            src: "",
+            origin: "",
+            title: "",
+            toc: [],
+            showBars: true,
+            showNav: false,
+            sliderDisabled: true,
+            fontSize: '23px'
         };
+
+        this.props.navigation.setParams({
+          Title: doc.data.title,
+          Location: this.state.location
+        });
+
         this.streamer = new Streamer();
     }
+
+
+
     componentDidMount() {
+        
         APILocal.get(this.state._id).then(doc => {
             console.log("Component did mount")
           console.log(doc);
@@ -72,6 +103,7 @@ export default class ReaderScren extends Component<Props>{
 
     toggleBars() {
           this.setState({ showBars: !this.state.showBars });
+          
      }
 
     render(){
@@ -89,9 +121,13 @@ export default class ReaderScren extends Component<Props>{
               src={this.state.src}
               flow={this.state.flow}
               location={this.state.location}
+              fontSize={this.state.fontSize}
               onLocationChange={(visibleLocation)=> {
                 console.log("locationChanged", visibleLocation)
                 this.setState({visibleLocation});
+                this.props.navigation.setParams({
+                      Location: visibleLocation.start.location
+                    });
               }}
               onLocationsReady={(locations)=> {
                 // console.log("location total", locations.total);
@@ -126,18 +162,19 @@ export default class ReaderScren extends Component<Props>{
               onMarkClicked={(cfiRange) => {
                 console.log("mark clicked", cfiRange)
               }}
-              // themes={{
-              //   tan: {
-              //     body: {
-              //       "-webkit-user-select": "none",
-              //       "user-select": "none",
-              //       "background-color": "tan"
-              //     }
-              //   }
-              // }}
-              // theme="tan"
-              // regenerateLocations={true}
-              // generateLocations={true}
+              themes={{
+                   typings: {
+                     body: {
+                     "-webkit-user-select": "none",
+                     "user-select": "none",
+                     "background-color": "#f7ebe3",
+                     "font-size": "32px"
+                   }
+                 }
+               }}
+               theme="typings"
+               regenerateLocations={true}
+              generateLocations={true}
               origin={this.state.origin}
               onError={(message) => {
                 console.log("EPUBJS-Webview", message);
@@ -148,6 +185,7 @@ export default class ReaderScren extends Component<Props>{
               <TopBar
                 title={this.state.title}
                 shown={this.state.showBars}
+                navigation={this.props.navigation}
                 onLeftButtonPressed={() => this._nav.show()}
                 onRightButtonPressed={
                   (value) => {
@@ -156,6 +194,16 @@ export default class ReaderScren extends Component<Props>{
                     } else {
                       this.setState({flow: "paginated"});
                     }
+                  }
+                }
+                onFontSmaller={
+                  (value) => {
+                    this.setState({fontSize: (parseInt(this.state.fontSize.replace(/px/,""))-1)+"px"});
+                  }
+                }
+                onFontBigger={
+                  (value) => {
+                    this.setState({fontSize: (parseInt(this.state.fontSize.replace(/px/,""))+1)+"px"});
                   }
                 }
                />
@@ -184,7 +232,6 @@ export default class ReaderScren extends Component<Props>{
         );
     }
 }
-
 
 const styles = StyleSheet.create({
   container: {

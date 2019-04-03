@@ -5,7 +5,7 @@ import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC } from 'react-native-dotenv'
+import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC, SETTINGS_LOCAL_DB_NAME } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
 import styles from '../../styles/docScreen.style';
 
@@ -45,18 +45,18 @@ export default class DocScreen extends Component<Props>{
    }
     render(){
         const {data, isLoading} = this.state;
-        return(
-
-            <ScrollView>
-                {isLoading && (
-          <ActivityIndicator
-            style={{ height: 80 }}
+        if (this.state.isLoading == true) {
+      return (
+        <ActivityIndicator
+            style={styles.indicator}
             color="#000"
             size="large"
           />
-        )}
-                {!isLoading && (
-                   
+        )
+    } else {
+        return(
+
+            <ScrollView>
                     <ImageBackground style={styles.container}  source={{uri: API_STATIC+'/covers/'+this.state.cover}}>
                           <LinearGradient
                             colors={['rgba(0, 0, 0,0.2)', 'rgba(0, 0, 0,0.1)', 'rgb(255, 255, 255)']}
@@ -64,7 +64,7 @@ export default class DocScreen extends Component<Props>{
                           >
                         </LinearGradient>
                         </ImageBackground>
-                        )}
+                       
 
                 <TouchableOpacity style={styles.readDoc} onPress={() => { this.onReadPress(this.props);  }}> 
                  <Icon name="eye" style={styles.readDocIcon} /> 
@@ -84,5 +84,6 @@ export default class DocScreen extends Component<Props>{
                 </View>
             </ScrollView>
         );
+    }
     }
 }

@@ -9,9 +9,13 @@ import {
   TouchableWithoutFeedback,
   View,
   Animated,
+  Dimensions,
   Slider
 } from 'react-native';
 import Icon from 'react-native-fa-icons';
+
+let ancho = Dimensions.get('window').width; //full width
+let alto = Dimensions.get('window').height; //full height
 
 const styles = StyleSheet.create({
   footer: {
@@ -37,14 +41,59 @@ const styles = StyleSheet.create({
   },
   slider: {
     height: 30,
+    width: 200,
     alignItems:'center',
     justifyContent:'center',
     flexDirection: 'row',
     flex: 1,
     marginLeft: 50,
     marginRight: 50
+  },
+  thumb: {
+        width: 50,
+        height: 80,
+        backgroundColor: '#000',
+        borderBottomRightRadius: 100,
+        borderTopRightRadius: 100,
+
+    },
+    track:{
+        borderRadius: 30 / 2,
+        backgroundColor: 'orange',
+        shadowColor: 'red',
+        shadowOffset: {width: 0, height: 2},
+        shadowRadius: 2,
+        shadowOpacity: 0.35,
+        height: 50,
+        borderBottomRightRadius: 20,
+        borderTopRightRadius: 20,
+    }
+});
+
+var sliderStyles = StyleSheet.create({
+  track: {
+    height: 10,
+    borderRadius: 4,
+    backgroundColor: 'white',
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 1},
+    shadowRadius: 1,
+    shadowOpacity: 0.15,
+  },
+  thumb: {
+    width: 20,
+    height: 20,
+    backgroundColor: '#f8a1d6',
+    borderColor: '#a4126e',
+    borderWidth: 5,
+    borderRadius: 10,
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 2,
+    shadowOpacity: 0.35,
   }
 });
+
 
 class BottomBar extends Component {
   constructor(props) {
@@ -111,7 +160,12 @@ class BottomBar extends Component {
             style={styles.slider}
             disabled={this.props.disabled}
             value={this.props.value}
+            maximumTrackTintColor='transparent'
+            minimumTrackTintColor='#000'
+            thumbStyle={sliderStyles.thumb}
+            trackStyle={sliderStyles.track}
             onSlidingComplete={this.props.onSlidingComplete} />
+
       </Animated.View>
     );
   }

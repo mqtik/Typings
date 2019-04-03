@@ -59,5 +59,11 @@ export default StyleSheet.create({
       position: 'absolute',
       left: 3,
       top: 1
+  },
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 80
   }
 });
