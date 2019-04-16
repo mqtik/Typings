@@ -27,6 +27,7 @@ const IS_ANDROID = Platform.OS === 'android';
 export default class ExploreScreen extends Component<Props> {
    constructor (props) {
         super(props);
+        console.log("this props exploreScreen", this.props)
 
         this.state = {
             slider1ActiveSlide: SLIDER_1_FIRST_ITEM,
@@ -43,7 +44,7 @@ export default class ExploreScreen extends Component<Props> {
       this._syncDocs();
       this._renderDocs();
       this._renderDocsByTagName('fiction')
-        console.log("this props signed", this.props)
+        
     }
 
     _syncDocs = event => {

@@ -12,7 +12,7 @@ npm install
 3. react-native link react-native-linear-gradient
 4. react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
 5. react-native link react-native-dialogs
-
+6. react-native link react-native-vector-icons
 # Clean Install
 lsof -ti :8081 | xargs kill -9
 npm start -- --reset-cache
@@ -66,6 +66,12 @@ I recommend [generator-rn-toolbox](https://github.com/bamlab/generator-rn-toolbo
 
 That's all. :) 
 
+
+## Run on iOS
+- react-native run-ios --configuration Release --device "Matías’s iPhone"
+
+Go to XCode -> Products -> Scheme -> Edit Scheme 
+On Build Configuration, change Debug to Release
 
 
 ## Android

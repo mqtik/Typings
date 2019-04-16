@@ -138,6 +138,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-vector-icons')
     compile project(':rn-fetch-blob')
     compile project(':react-native-fetch-blob')
     compile project(':react-native-svg')
@@ -158,4 +159,10 @@ dependencies {
 task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
+}
+
+
+project.afterEvaluate {
+    apply from: '../../node_modules/react-native-zss-rich-text-editor/htmlCopy.gradle';
+    copyEditorHtmlToAppAssets(file('../../node_modules/react-native-zss-rich-text-editor'))
 }

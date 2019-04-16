@@ -1,4 +1,5 @@
 {
   "name": "Typings",
-  "displayName": "Typings"
+  "displayName": "Typings",
+  "supportsTablet": true
 }

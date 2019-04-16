@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView } from 'react-native';
 import Icon from 'react-native-fa-icons';
+import Icono from 'react-native-vector-icons/Ionicons';
 import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
@@ -67,18 +68,18 @@ export default class DocScreen extends Component<Props>{
                        
 
                 <TouchableOpacity style={styles.readDoc} onPress={() => { this.onReadPress(this.props);  }}> 
-                 <Icon name="eye" style={styles.readDocIcon} /> 
-                 <Icon name="circle-o" style={styles.readDocIconCircle} /> 
+                 
+                 <Icono name="ios-git-commit" style={styles.readDocIconCircle} /> 
                         <Text style={{color: '#e89ee5', fontSize: 20, fontWeight: '500', textAlign: 'center', margin: 13, marginLeft: 30}}>
-                            READ
+                            START
                         </Text>
                 </TouchableOpacity>
 
                 <View>
-                        <Text style={{color: '#222', fontSize: 26, fontWeight: 'bold', textAlign: 'center', alignItems: 'center'}}>
+                        <Text style={{color: '#222', marginTop: -50, fontSize: 26, fontWeight: 'bold', textAlign: 'center', alignItems: 'center'}}>
                             {this.state.title}
                         </Text>
-                        <Text style={{color: '#999', fontSize: 14, marginTop: 10, padding: 25, textAlign: 'left'}}>
+                        <Text style={{color: '#999', fontSize: 18, marginTop: 10, padding: 25, textAlign: 'left'}}>
                              {this.state.description}
                         </Text>
                 </View>

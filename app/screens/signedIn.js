@@ -9,6 +9,9 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Animated, Easing } from 'react-native';
 import Icon from 'react-native-fa-icons';
+import Icono from 'react-native-vector-icons/Ionicons';
+import EntypoIcono from 'react-native-vector-icons/Entypo';
+
 import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
@@ -21,11 +24,14 @@ import SliderEntry from '../components/SliderEntry';
 import styles, { colors } from '../styles/index.style';
 import { ENTRIES1, ENTRIES2 } from '../static/entries';
 import { scrollInterpolators, animatedStyles } from '../utils/animations';
-import { createBottomTabNavigator, createStackNavigator, createAppContainer, HeaderBackButton } from 'react-navigation';
+
+import { createBottomTabNavigator, createStackNavigator, createAppContainer, HeaderBackButton, NavigationActions, StackActions } from 'react-navigation';
 import DocScreen from './routes/docScreen.js';
 import ReaderScreen from './routes/readerScreen.js';
 import ExploreScreen from './routes/exploreScreen.js';
 import CreatorsScreen from './routes/creatorsScreen.js';
+import ChaptersScreen from './routes/creators/chaptersScreen.js';
+import ChapterDetailsScreen from './routes/creators/chapterDetailsScreen.js';
 import SettingsScreen from './routes/settingsScreen.js';
 
 
@@ -63,8 +69,31 @@ type Props = { navigation: Function }
 
 export default class SignedIn extends React.Component {
   constructor(props) {
-      super(props)
+      super(props);
+      console.log("this props signed IN!", this.props);
    }
+
+    _onLogout = () => {
+      console.log("Siging out")
+          API.logOut((err, response) => {
+        if (err) {
+          // network error
+          console.log("on error", err)
+          return null;
+        }
+        console.log("signedIn onLogout: ", response)
+        APILocalSettings.destroy().then(res => {
+          APILocalSettings = new PouchDB(SETTINGS_LOCAL_DB_NAME);
+          console.log("signedIn: Destroying settings of user!", res)
+          const resetAction = StackActions.reset({
+                index: 0,
+                actions: [NavigationActions.navigate({ routeName: 'SignedOut' })],
+            });
+          this.props.navigation.dispatch(resetAction);
+
+        });
+      })
+    }
     render() {
       const HomeNavigator = createStackNavigator({
                         Explore:{
@@ -72,7 +101,7 @@ export default class SignedIn extends React.Component {
                             navigationOptions: {
                                  headerLeft: null,
                                  title: 'Typings',
-                                 gesturesEnabled: false,
+                                 gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
                                    },
@@ -86,7 +115,7 @@ export default class SignedIn extends React.Component {
                             screen: DocScreen,
                             navigationOptions: {
                                  title: 'Details',
-                                 gesturesEnabled: false,
+                                 gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
                                    },
@@ -99,7 +128,7 @@ export default class SignedIn extends React.Component {
                         Reader:{
                             screen: ReaderScreen,
                             navigationOptions: {
-                                 gesturesEnabled: false,
+                                 gesturesEnabled: true,
                                  headerStyle: {
                                     backgroundColor: '#333',
                                  },
@@ -117,7 +146,34 @@ export default class SignedIn extends React.Component {
                             navigationOptions: {
                                  headerLeft: null,
                                  title: 'Creators',
-                                 gesturesEnabled: false,
+                                 gesturesEnabled: true,
+                                 headerStyle: {
+                                  backgroundColor: '#333',
+                                   },
+                                 headerTintColor: '#fff',
+                                 headerTitleStyle: {
+                                   fontWeight: '200',
+                                  },
+                           }
+                        },
+                        Chapters:{
+                            screen: ChaptersScreen,
+                            navigationOptions: {
+                                 title: 'Chapters',
+                                 gesturesEnabled: true,
+                                 headerStyle: {
+                                  backgroundColor: '#333',
+                                   },
+                                 headerTintColor: '#fff',
+                                 headerTitleStyle: {
+                                   fontWeight: '200',
+                                  },
+                           }
+                        },
+                        ChapterDetails:{
+                            screen: ChapterDetailsScreen,
+                            navigationOptions: {
+                                 gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
                                    },
@@ -135,7 +191,7 @@ export default class SignedIn extends React.Component {
                             navigationOptions: {
                                  headerLeft: null,
                                  title: 'Settings',
-                                 gesturesEnabled: false,
+                                 gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
                                    },
@@ -143,7 +199,8 @@ export default class SignedIn extends React.Component {
                                  headerTitleStyle: {
                                    fontWeight: '200',
                                   },
-                           }
+                           },
+
                         }
                     }, {initialRouteName: 'Account'});
 
@@ -153,7 +210,7 @@ export default class SignedIn extends React.Component {
                  navigationOptions: {
                     tabBarLabel:"Explore",
                     tabBarIcon: ({ tintColor }) => (
-                       <Icon name="flash" size={20} style={{color: tintColor}} />
+                       <Icono name="ios-git-branch" size={20} style={{color: tintColor}} />
                     )
                   }
              },
@@ -162,7 +219,7 @@ export default class SignedIn extends React.Component {
               navigationOptions: {
                     tabBarLabel:"Creators",
                     tabBarIcon: ({ tintColor }) => (
-                       <Icon name="plus-circle" size={20} style={{color: tintColor}} />
+                       <EntypoIcono name="flow-cascade" size={20} style={{color: tintColor}} />
                     )
                   }
              },
@@ -171,7 +228,7 @@ export default class SignedIn extends React.Component {
               navigationOptions: {
                     tabBarLabel:"Settings",
                     tabBarIcon: ({ tintColor }) => (
-                       <Icon name="cogs" size={20} style={{color: tintColor}} />
+                       <Icono name="ios-git-compare" size={20} style={{color: tintColor}} />
                     )
                   }, 
              }
@@ -186,7 +243,8 @@ export default class SignedIn extends React.Component {
               style: {
                 backgroundColor: '#111',
               }
-            }
+            },
+            onLogout: this._onLogout
         });
         const MainNavigator = createAppContainer(TabNavigation);
         // return (
@@ -195,7 +253,7 @@ export default class SignedIn extends React.Component {
         //     </View>
         // );
 
-        return <MainNavigator/>
+        return <MainNavigator screenProps={{ onLogout: this._onLogout }}/>
     }
 }
 

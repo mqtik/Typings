@@ -9,7 +9,7 @@
 	https://github.com/Sh1n1x/react-native-app-intro
 	https://github.com/ngothanhtai/react-native-auto-typing-text
 
-	
+
 	for creators
 	https://github.com/jmurzy/react-native-foldview
 	https://github.com/maxs15/react-native-modalbox
@@ -37,6 +37,7 @@
 	# Submit button animated
 	https://github.com/ronak301/react-native-submit-button
 	https://github.com/zecaptus/react-native-md-motion-buttons
+	https://github.com/mastermoo/react-native-pulse-loader
 
 	# For download ebooks
 	https://github.com/prscX/react-native-download-button
@@ -52,7 +53,39 @@
 	# Expandable Load More
 	https://github.com/hejiaji/react-native-expand
 
+	# Progress Bar
+	https://github.com/kis/react-native-air-progress-bar
 
+	# Pull to refresh
+	https://github.com/Obooman/RCTRefreshControl
+
+	# Lazy load image
+	https://github.com/phuochau/react-native-beautiful-image	
+
+	https://github.com/IskenHuang/react-native-scrollview-lazyload
+
+	# tags
+	https://github.com/Tinysymphony/react-native-label-select
+
+	# switch selector
+	https://github.com/App2Sales/react-native-switch-selector
+
+
+	# Offline mode
+	https://github.com/rauchy/react-native-offline-mode
+
+	# Tabs for genres
+		https://github.com/lelandrichardson/react-native-segmented-view
+
+	# iPhone X: 
+		https://www.npmjs.com/package/react-native-iphone-x-helper
+
+
+Shared Element react-native 
+https://medium.freecodecamp.org/shared-element-transition-with-react-native-159f8bc37f50
+
+# Ride guide
+https://github.com/octopitus/rn-sliding-up-panel
 
 # Articles
 	- Awesome UI examples

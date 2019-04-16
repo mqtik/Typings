@@ -6,13 +6,22 @@
  * @flow
  */
 import React, {Component} from 'react';
-import {Platform, AppRegistry} from 'react-native';
+import {Platform, AppRegistry, ActivityIndicator, StyleSheet, Animated, Easing} from 'react-native';
 import Icon from 'react-native-fa-icons';
 import PouchDB from 'pouchdb-react-native';
-import PouchDBAuth from 'pouchdb-authentication';
-import { API_URL, PORT_API_DIRECT, PORT_API } from 'react-native-dotenv';
-import { createStackNavigator, createAppContainer } from 'react-navigation';
-
+import APIAuth from 'pouchdb-authentication';
+import APIFind from 'pouchdb-find'
+import APIUpsert from 'pouchdb-upsert'
+import {  API_URL, 
+          PORT_API_DIRECT, 
+          PORT_API, 
+          DB_BOOKS, 
+          INDEX_NAME, 
+          LOCAL_DB_NAME, 
+          API_STATIC, 
+          SETTINGS_LOCAL_DB_NAME 
+  } from 'react-native-dotenv'
+import { createStackNavigator, createAppContainer, NavigationActions } from 'react-navigation';
 
 /**
  * Screens
@@ -24,8 +33,15 @@ import { createStackNavigator, createAppContainer } from 'react-navigation';
 import SignedOut from './screens/signedOut.js';
 import SignedIn from './screens/signedIn.js';
 
-PouchDB.plugin(PouchDBAuth)
+PouchDB.plugin(APIAuth)
+PouchDB.plugin(APIFind);
+PouchDB.plugin(APIUpsert);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
+let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
+let APILocal = PouchDB(LOCAL_DB_NAME);
+let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
+
+
 let initRoute;
 
 
@@ -53,7 +69,7 @@ const Routes = createStackNavigator({
               },*/
        }
     }
-}, {initialRouteName: initRoute});
+}, { initialRouteName: initRoute });
 
 const AppNavigator = createAppContainer(Routes);
 module.exports = Routes;
@@ -73,34 +89,73 @@ export default class App extends Component<Props> {
   constructor(props) {
       super(props)
       this.state = {
-         introText: '',
-         username: null,
-         password: null,
-         auth: null,
-         placeholder: 'Username',
-         showPassword: false,
-         color: 'red',
-         exist: 'false'
+         isLoading: true,
+         isLoggedIn: false
       }
 
+   }
+   componentDidMount() {
+     APILocalSettings.get('UserSettings')
+        .then(res => {
+          console.log("get user settings app.js", res)
+          if(res.username != null){
+             console.log("User settings APPP!!", res);
+             this.setState({ isLoading: false, isLoggedIn: true });
+          } else {
+            this.setState({ isLoading: false });
+         }
+
+            
+        })
+        .catch(err => {
+          this.setState({ isLoading: false });
+        })
+     
    }
    onNext = () => {
       this.setState({introText: 'My Changed Text'})
    }
 
 
+
       /*<Text style={styles.instructions}>To get started, edit App.js</Text>*/
         /*<Text style={styles.instructions}>{instructions}</Text>*/
 
   render() {
-
-    return (
-
-        <AppNavigator style={{marginTop: 0, paddingTop: 0}} navigation={this.props.navigation}/>
-
-    );
+    if (this.state.isLoading == true) {
+      return (
+        <ActivityIndicator
+            style={styles.indicator}
+            color="#000"
+            size="large"
+          />
+        )
+      } else {
+        if(this.state.isLoggedIn == true) {
+          console.log("is logged in!")
+          return (
+            <SignedIn style={{marginTop: 0, paddingTop: 0}} 
+            navigation={this.props.navigation}/>
+          );
+        } else {
+          console.log("is not logged in!")
+          return (
+            <AppNavigator style={{marginTop: 0, paddingTop: 0}} navigation={this.props.navigation}/>
+          );
+        }
+    }
   }
 }
- 
+
 module.exports = App;
+
+const styles = StyleSheet.create({
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 80
+  }
+});
+
 AppRegistry.registerComponent('Navigation', () => Navigation);

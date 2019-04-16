@@ -9,11 +9,15 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ActivityIndicator} from 'react-native';
 import Icon from 'react-native-fa-icons';
+
+import Icono from 'react-native-vector-icons/Ionicons';
 import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
 import APIUpsert from 'pouchdb-upsert'
 import Toast, {DURATION} from 'react-native-easy-toast'
+import KeyboardSpacer from 'react-native-keyboard-spacer';
+import { createStackNavigator, createAppContainer, NavigationActions, StackActions } from 'react-navigation';
 import { API_URL, PORT_API_DIRECT, PORT_API, SETTINGS_LOCAL_DB_NAME, DB_BOOKS, LOCAL_DB_NAME } from 'react-native-dotenv'
 PouchDB.plugin(APIAuth)
 PouchDB.plugin(APIFind);
@@ -53,6 +57,8 @@ export default class SignedOut extends Component<Props> {
      
 
    }
+
+
    componentDidMount() {
       // do stuff while splash screen is shown
         // After having done stuff (such as async tasks) hide the splash screen
@@ -66,7 +72,7 @@ export default class SignedOut extends Component<Props> {
           console.log("There's no user logged in!", err)
         })
             API.getSession((err, response) => {
-
+              console.log("Getting session", response)
                 if (err) {
                   // network error
                 } else if (!response.userCtx.name) {
@@ -87,7 +93,8 @@ export default class SignedOut extends Component<Props> {
                     }).then((res) => {
                       console.log("User settings saved!", res)
                       APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
-                      Go.navigate("SignedIn");
+                      //Go.navigate("SignedIn");
+                      this.onContinueAs();
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
                       console.log("User settings error on saving", error)
@@ -104,6 +111,18 @@ export default class SignedOut extends Component<Props> {
         });
     }
             
+
+   onContinueAs = () => {
+        
+        const resetAction = StackActions.reset({
+            index: 0,
+            actions: [NavigationActions.navigate({ routeName: 'SignedIn', params: {
+                          onLogout: this._onLogout,
+                          user: this.state.username
+                        } })],
+        });
+      this.props.navigation.dispatch(resetAction);
+   }
 
    onNext = () => {
       this.setState({introText: 'My Changed Text'})
@@ -162,7 +181,33 @@ export default class SignedOut extends Component<Props> {
                   console.log("Logged in!", res);
                   this.setState({color: '#36ca41'});
                   this.refs.toast.show('Bienvenido, '+ this.state.username, 2000);
-                   this.props.navigation.navigate("SignedIn")
+                   //this.props.navigation.navigate("SignedIn")
+                   API.getUser(this.state.username).then(res => {
+                    console.log("Get user from API", res)
+                      APILocalSettings.upsert('UserSettings', doc => {
+                       console.log("User settings logged", res.nombre, doc)
+                        
+                          doc.logged_in = true;
+                          doc.username = res.name;
+                          doc.nombre = res.nombre;
+                          doc.gender = res.gender;
+                          doc.allow_push_notifications = res.allow_push_notifications;
+                        
+                        return doc;
+                      }).then((res) => {
+                        console.log("User settings saved!", res)
+                        APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
+                        //Go.navigate("SignedIn");
+                          this.onContinueAs();
+                        // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                      }).catch((error) => {
+                        console.log("User settings error on saving", error)
+                        // error
+                      });
+                    }).catch((error) => {
+                      console.log("User getting user on login", error)
+                      // error
+                    });
                   /*return API.logOut();*/
                 }).catch(err => {
                   this.setState({color: 'red'});
@@ -179,10 +224,36 @@ export default class SignedOut extends Component<Props> {
                       likes : ['harry potter', 'la tregua', 'forrest gump\''],
                     }
                }).then(res => {
+                 API.getUser(this.state.username).then(res => {
+                    console.log("Get user from API", res)
+                      APILocalSettings.upsert('UserSettings', doc => {
+                       console.log("User settings logged", res.nombre, doc)
+                        
+                          doc.logged_in = true;
+                          doc.username = res.name;
+                          doc.nombre = res.nombre;
+                          doc.gender = res.gender;
+                          doc.allow_push_notifications = res.allow_push_notifications;
+                        
+                        return doc;
+                      }).then((res) => {
+                        console.log("User settings saved!", res)
+                        APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
+                        //Go.navigate("SignedIn");
+                        this.onContinueAs();
+                        // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                      }).catch((error) => {
+                        console.log("User settings error on saving", error)
+                        // error
+                      });
+                    }).catch((error) => {
+                      console.log("User getting user on login", error)
+                      // error
+                    });
                   console.log("Registered!", res);
                   this.setState({color: '#36ca41'});
                   this.refs.toast.show('Te has registrado con éxito. \n Bienvenido, '+ this.state.username, 2000);
-                   this.props.navigation.navigate("SignedIn")
+                 
                   /*return API.logOut();*/
                 }).catch(err => {
                   this.setState({color: 'red'});
@@ -238,7 +309,6 @@ export default class SignedOut extends Component<Props> {
         <Text style={styles.welcome}>Typings</Text>
        <Text style={styles.welcome}>{this.state.introText}</Text>
 
-
        <View style={styles.logInContainer}>
         <View style={{ flex: 10, paddingLeft: 10 }}>
           <TextInput
@@ -254,10 +324,10 @@ export default class SignedOut extends Component<Props> {
         </View>
         {this.state.showPassword && 
           <TouchableOpacity style={styles.buttonAuthBack} onPress={this._onGoBackAuth}>
-          <Icon name="angle-double-left" style={styles.pressLogIn} />
+          <Icono name="ios-arrow-dropleft" style={styles.pressLogIn} />
         </TouchableOpacity>}
         <TouchableOpacity style={styles.buttonAuth} onPress={this._onPress}>
-          <Icon name="angle-double-right" style={styles.pressLogIn} />
+          <Icono name="ios-arrow-dropright" style={styles.pressLogIn} />
         </TouchableOpacity>
          
       </View>
@@ -272,7 +342,11 @@ export default class SignedOut extends Component<Props> {
                     textStyle={{color:'white'}}
                 />
       </ImageBackground>
+
+
+        <KeyboardSpacer/>
       </View>
+
 
     );
     }
@@ -284,7 +358,7 @@ export class GoBackAuth extends SignedOut {
   render() {
     return (
       <TouchableOpacity style={styles.buttonAuthBack} onPress={this._onGoBackAuth}>
-          <Icon name="angle-double-left" style={styles.pressLogIn} />
+          <Icono name="ios-arrow-dropleft" style={styles.pressLogIn} />
         </TouchableOpacity>
     );
   }
@@ -327,25 +401,27 @@ const styles = StyleSheet.create({
   pressLogIn: {
     fontSize: 30, 
     marginTop: 9,
-    marginRight: 8,
     color: '#fff',
-    alignSelf: 'flex-end',
-    borderWidth: 0
+    borderWidth: 0,
   },
   buttonAuthBack: { 
-    borderRadius: 30,
-    width: 1,
+     borderRadius: 30,
+        width: 50,
+        height: 50,
     backgroundColor: "#111",
-    flex: 2, 
-    paddingRight: 10,
-    marginRight: 10
+    flex: 0,
+    paddingLeft: 12,
+    paddingTop: 1,
+    marginRight: 5
   },
   buttonAuth: { 
-        borderRadius: 30,
-        width: 1,
+     borderRadius: 30,
+        width: 50,
+        height: 50,
     backgroundColor: "#111",
-    flex: 2, 
-    paddingRight: 10 
+    flex: 0,
+    paddingLeft: 12,
+    paddingTop: 1
   },
   logInContainer: {
     position: 'absolute', 

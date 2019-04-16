@@ -21,10 +21,14 @@ import {
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
+PouchDB.plugin(APIUpsert);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME);
+
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
+
+
 /*
 db.putUser('robin', {
   metadata : {
@@ -51,7 +55,8 @@ export default class SettingsScreen extends Component<Props>{
 	      username: "",
 	      name: "",
 	      allowPushNotifications: false,
-	      gender: ""
+	      gender: "",
+        enablePagination: true
 	    };
 	    console.log("this props settings", this.props)
 	    
@@ -72,24 +77,12 @@ export default class SettingsScreen extends Component<Props>{
 					        })
 	  }
 	  _onLogout = () => {
-	  	console.log("Log out!")
-        API.logOut((err, response) => {
-		  if (err) {
-		    // network error
-		    console.log("on error", err)
-		    return null;
-		  }
-		  console.log("on response!", response)
-		  APILocalSettings.destroy().then(res => {
-		    APILocalSettings = new PouchDB(SETTINGS_LOCAL_DB_NAME);
-		    console.log("apilocalsettings destroy!", res)
-		    const resetAction = StackActions.reset({
-                           index: 0,
-                           actions: [NavigationActions.navigate({ routeName: 'SignedOut' })],
-                       });
-                       this.props.navigation.dispatch(resetAction);
-		  });
-		})
+
+	  	console.log("Log out Settings!", this.props)
+         
+          this.props.screenProps.onLogout();
+    
+       
 	  }
 	  render(){
         return(
@@ -222,7 +215,7 @@ export default class SettingsScreen extends Component<Props>{
           });
         }}
         value={this.state.gender}
-        styleModalButtonsText={{ color: colors.monza }}
+        styleModalButtonsText={{ color: '#111' }}
       />
       <SettingsDividerLong />
     	<TouchableOpacity style={styles.buttonStyle}
@@ -233,7 +226,7 @@ export default class SettingsScreen extends Component<Props>{
 
     	<SettingsCategoryHeader
 	        title={"Application"}
-	        textStyle={Platform.OS === "android" ? { color: colors.monza } : null}
+	        textStyle={Platform.OS === "android" ? { color: '#111' } : null}
 	        style={{backgroundColor: '#999'}}
 	      />
 	    <SettingsDividerLong />
@@ -274,6 +267,49 @@ export default class SettingsScreen extends Component<Props>{
           });
         }}
         value={this.state.allowPushNotifications}
+        trackColor={{
+          true: colors.switchEnabled,
+          false: colors.switchDisabled,
+        }}
+      />
+
+      <SettingsSwitch
+        title={"Enable pagination"}
+        onValueChange={value => {
+          console.log("enable pagination:", value);
+          APILocalSettings.upsert('UserSettings', doc => {
+                      if (doc.logged_in) {
+                        doc.enable_pagination = value;
+                      }
+                      return doc;
+                    }).then((res) => {
+                      APILocalSettings.get('UserSettings')
+                  .then(resp => {
+                    console.log("Settings of user!", resp);
+                    API.putUser(resp.username, {
+                  metadata : {
+                    enable_pagination: resp.enable_pagination
+                  }
+                }).then((response) => {
+                  // etc.
+                  console.log("Respuesta save api", response)
+                }).catch((err) => {
+                  console.log("Respuesta saveeeeee error!", err)
+                });
+                  })
+                  .catch(err => {
+                    console.log("There's no user logged in!", err)
+                  })
+                      // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                    }).catch((error) => {
+                      console.log("User settings error on saving", error)
+                      // error
+                    });
+          this.setState({
+            enablePagination: value
+          });
+        }}
+        value={this.state.enablePagination}
         trackColor={{
           true: colors.switchEnabled,
           false: colors.switchDisabled,

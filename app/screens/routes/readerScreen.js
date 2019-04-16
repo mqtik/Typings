@@ -8,7 +8,7 @@ import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC } from 'react-native-dotenv'
+import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC, SETTINGS_LOCAL_DB_NAME } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
 import { Epub, Streamer } from 'epubjs-rn';
 import BottomBar from '../../components/BookBottomBar';
@@ -19,6 +19,7 @@ PouchDB.plugin(APIFind);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME);
+let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
 
 export default class ReaderScreen extends Component<Props>{
       static navigationOptions = ({ navigation }) => {
@@ -29,7 +30,7 @@ export default class ReaderScreen extends Component<Props>{
             //Background color of ActionBar
           headerRight: (
               <TouchableOpacity onPress={() => this._nav.show()}>
-                  <Text>
+                  <Text style={{color: 'transparent'}}>
                     {navigation.getParam('Location', '5')}
                   </Text>
               </TouchableOpacity>
@@ -78,7 +79,16 @@ export default class ReaderScreen extends Component<Props>{
 
 
     componentDidMount() {
-        
+        APILocalSettings.get('UserSettings')
+                  .then(resp => {
+                    console.log("Settings of user!", resp);
+                    if(resp.enable_pagination == false){
+                        this.setState({flow: "scrolled-continuous"});
+                      }
+                  })
+                  .catch(err => {
+                    console.log("There's no user logged in!", err)
+                  })
         APILocal.get(this.state._id).then(doc => {
             console.log("Component did mount")
           console.log(doc);
@@ -112,9 +122,7 @@ export default class ReaderScreen extends Component<Props>{
         return(
 
               <View style={styles.container}>
-        <StatusBar hidden={!this.state.showBars}
-          translucent={true}
-          animated={false} />
+        
         <Epub style={styles.reader}
               ref="epub"
               //src={"https://s3.amazonaws.com/epubjs/books/moby-dick.epub"}
@@ -131,6 +139,10 @@ export default class ReaderScreen extends Component<Props>{
               }}
               onLocationsReady={(locations)=> {
                 // console.log("location total", locations.total);
+                console.log("on location ready!", locations.total)
+                this.props.navigation.setParams({
+                      TotalPages: locations.total
+                    });
                 this.setState({sliderDisabled : false});
               }}
               onReady={(book)=> {

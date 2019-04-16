@@ -12,6 +12,7 @@ import {
   Dimensions,
   Slider
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-fa-icons';
 
 let ancho = Dimensions.get('window').width; //full width
@@ -19,7 +20,7 @@ let alto = Dimensions.get('window').height; //full height
 
 const styles = StyleSheet.create({
   footer: {
-    backgroundColor: "#f7ebe3",
+    backgroundColor: "transparent",
     paddingTop: 0,
     bottom: 0,
     ...Platform.select({
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     }),
     right: 0,
     left: 0,
-    borderTopWidth: 1,
+    borderTopWidth: 0,
     borderTopColor:"#f3e2d7",
     position: 'absolute',
     alignItems:'center',
@@ -156,6 +157,23 @@ class BottomBar extends Component {
   render() {
     return (
       <Animated.View style={[styles.footer, { opacity: this.state.fadeAnim }]}>
+      <LinearGradient
+        colors={['#a243b1', 'rgba(162, 67, 177, .5)', 'rgba(162, 67, 177, .3)', 'rgba(162, 67, 177, .1)', 'rgba(162, 67, 177, 0)']}
+        style={{height: 50, width: ancho, bottom: 0, position: 'absolute'}}
+        
+         start={{ x: 0, y: 1 }}
+         end={{ x: 0, y: 0 }}
+
+        // Horizontal Gradient
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 0 }}
+
+        // Diagonal Gradient
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 1 }}
+      >
+        
+       </LinearGradient>
         <Slider
             style={styles.slider}
             disabled={this.props.disabled}

@@ -9,18 +9,38 @@ import {
   TouchableWithoutFeedback,
   View,
   Animated,
-  StatusBar
+  StatusBar,
+  Dimensions
 } from 'react-native';
-
+import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-fa-icons';
+import Icono from 'react-native-vector-icons/Ionicons';
+
+var ancho = Dimensions.get('window').width; //full width
+var alto = Dimensions.get('window').height; //full height
 
 const styles = StyleSheet.create({
-  title: {
+  current_page: {
     textAlign: 'center',
     fontSize: 22,
     fontWeight: '400',
     flex: 8,
-    color: '#000',
+    color: '#65256f',
+    ...Platform.select({
+      ios: {
+        fontFamily: "Baskerville",
+      },
+      android: {
+        fontFamily: "serif"
+      },
+    }),
+  },
+  total_pages: {
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '400',
+    flex: 8,
+    color: 'rgba(133, 64, 144, 0.71)',
     ...Platform.select({
       ios: {
         fontFamily: "Baskerville",
@@ -31,13 +51,13 @@ const styles = StyleSheet.create({
     }),
   },
   header: {
-    backgroundColor: "#f7ebe3",
+    backgroundColor: "transparent",
     ...Platform.select({
       ios: {
-        paddingTop: 5,
+        paddingTop: 3,
       },
       android: {
-        paddingTop: 5,
+        paddingTop: 3,
       },
     }),
     top: 0,
@@ -51,14 +71,15 @@ const styles = StyleSheet.create({
     }),
     right: 0,
     left: 0,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomColor:"#f3e2d7",
     position: 'absolute',
     display: 'flex',
     alignItems:'center',
     justifyContent:'center',
     flexDirection: 'row',
-    flex: 14
+    flex: 14,
+    color: '#fff'
   },
   backButton: {
     width: 34,
@@ -72,8 +93,8 @@ const styles = StyleSheet.create({
   },
   NextPrevButton: {
     width: 20,
-    height: 34,
-    margin: 16,
+    height: 28,
+    margin: 10,
     flex: 1,
     display: 'flex',
     alignItems:'center',
@@ -143,23 +164,46 @@ class TopBar extends Component {
 
   render() {
     return (
+      
       <Animated.View style={[styles.header, { opacity: this.state.fadeAnim }]}>
+         <LinearGradient
+        colors={['#a243b1', 'rgba(162, 67, 177, .5)', 'rgba(162, 67, 177, .3)', 'rgba(162, 67, 177, .1)', 'rgba(162, 67, 177, 0)']}
+        style={{height: 50, width: ancho, top: 0, position: 'absolute'}}
+        //  Linear Gradient 
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+
+        // Linear Gradient Reversed
+        // start={{ x: 0, y: 1 }}
+        // end={{ x: 1, y: 0 }}
+
+        // Horizontal Gradient
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 0 }}
+
+        // Diagonal Gradient
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 1 }}
+      >
+        
+       </LinearGradient>
         <TouchableOpacity style={styles.backButton}
           onPress={this.props.onLeftButtonPressed}>
-          <Icon name="map-signs" style={{fontSize: 20}} />
+          <Icono name="ios-albums" style={{fontSize: 24, color: '#65256f'}} />
         </TouchableOpacity>
-        <Text style={styles.title}>
+        <Text style={styles.current_page}>
           {this.props.navigation.getParam('Location', '')}
+          /{this.props.navigation.getParam('TotalPages', '0')}
         </Text>
-
+        
         <TouchableOpacity style={styles.NextPrevButton}
           onPress={this.props.onFontSmaller}>
-          <Icon name="minus-circle" style={{fontSize: 20}} />
+          <Icono name="ios-remove-circle-outline" style={{fontSize: 24, color: '#65256f'}} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.NextPrevButton}
           onPress={this.props.onFontBigger}>
-          <Icon name="plus-circle" style={{fontSize: 20}} />
+          <Icono name="ios-add-circle-outline" style={{fontSize: 24, color: '#65256f'}} />
         </TouchableOpacity>
         {/*
         <TouchableOpacity style={styles.backButton}
@@ -168,6 +212,7 @@ class TopBar extends Component {
         </TouchableOpacity>
         */}
       </Animated.View>
+      
     );
   }
 }
