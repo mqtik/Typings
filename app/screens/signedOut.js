@@ -19,6 +19,10 @@ import Toast, {DURATION} from 'react-native-easy-toast'
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import { createStackNavigator, createAppContainer, NavigationActions, StackActions } from 'react-navigation';
 import { API_URL, PORT_API_DIRECT, PORT_API, SETTINGS_LOCAL_DB_NAME, DB_BOOKS, LOCAL_DB_NAME } from 'react-native-dotenv'
+import AppIntroSlider from 'react-native-app-intro-slider';
+import LinearGradient from 'react-native-linear-gradient';
+import { getLang, Languages } from '../static/languages';
+
 PouchDB.plugin(APIAuth)
 PouchDB.plugin(APIFind);
 PouchDB.plugin(APIUpsert);
@@ -38,7 +42,29 @@ const instructions = Platform.select({
 
 type Props = { navigation: Function }
 
-
+const slides = [
+                  {
+                    key: 'somethun',
+                    title: 'Empieza a leer ahora. \n Gratis.',
+                    text: 'Explora un mundo de libros diferentes. Puedes leerlos offline cuando no tengas conexión.',
+                    icon: 'ios-git-branch',
+                    colors: ['#63E2FF', '#B066FE'],
+                  },
+                  {
+                    key: 'somethun1',
+                    title: 'Personalizable',
+                    text: 'Customizá Typings para ingresar a una historia de perspectivas diferentes. Agrenda la letra, busca capítulos, swipeá o scrolleá para seguir leyendo.',
+                    icon: 'ios-git-pull-request',
+                    colors: ['#A3A1FF', '#3A3897'],
+                  },
+                  {
+                    key: 'somethun2',
+                    title: 'Construye tu libro',
+                    text: 'Todo tu contenido estará en constante sincronización con la nube, con diferentes revisiones, asegurando que nunca pierdas nada.',
+                    icon: 'ios-git-network',
+                    colors: ['#29ABE2', '#4F00BC'],
+                  },
+                ];
 
 export default class SignedOut extends Component<Props> {
   constructor() {
@@ -48,7 +74,7 @@ export default class SignedOut extends Component<Props> {
          username: null,
          password: null,
          auth: null,
-         placeholder: 'Username',
+         placeholder: Languages.Username[getLang()],
          showPassword: false,
          color: 'red',
          exist: 'false',
@@ -62,6 +88,7 @@ export default class SignedOut extends Component<Props> {
    componentDidMount() {
       // do stuff while splash screen is shown
         // After having done stuff (such as async tasks) hide the splash screen
+        
         let Go = this.props.navigation;
         
         APILocalSettings.get('UserSettings')
@@ -79,6 +106,7 @@ export default class SignedOut extends Component<Props> {
                   // nobody's logged in
                 } else {
                   API.getUser(response.userCtx.name).then(res => {
+
                     console.log("Get user from API", res)
                     APILocalSettings.upsert('UserSettings', doc => {
                      console.log("User settings logged", res.nombre, doc)
@@ -87,6 +115,7 @@ export default class SignedOut extends Component<Props> {
                         doc.username = res.name;
                         doc.nombre = res.nombre;
                         doc.gender = res.gender;
+                        doc.roles = res.roles;
                         doc.allow_push_notifications = res.allow_push_notifications;
                       
                       return doc;
@@ -127,6 +156,22 @@ export default class SignedOut extends Component<Props> {
    onNext = () => {
       this.setState({introText: 'My Changed Text'})
    }
+   _renderItem = props => (
+      <LinearGradient
+        style={[styles.mainContent, {
+          width: props.width,
+          height: props.height,
+        }]}
+        colors={props.colors}
+        start={{x: 0, y: .1}} end={{x: .1, y: 1}}
+      >
+        <Icono style={{ backgroundColor: 'transparent' }} name={props.icon} size={150} color="white" />
+        <View style={{marginTop: -240}}>
+          <Text style={styles.title}>{props.title}</Text>
+          <Text style={styles.text}>{props.text}</Text>
+        </View>
+      </LinearGradient>
+  );
    _onPress = () => {
      
        console.log("Username", this.state.username)
@@ -161,7 +206,7 @@ export default class SignedOut extends Component<Props> {
           }
         this.setState({username: this.state.auth});
         this.setState(
-              {auth: "", placeholder: "Password", showPassword: true}, 
+              {auth: "", placeholder: Languages.Password[getLang()], showPassword: true}, 
               function () {
                 console.log("Updated!", this.state.username)
               }
@@ -303,11 +348,17 @@ export default class SignedOut extends Component<Props> {
       
 
       <View style={styles.container}>
-      <ImageBackground style={ styles.imgBackground } 
-                 resizeMode='cover' 
-                 source={require('../../assets/bg.jpg')}>
-        <Text style={styles.welcome}>Typings</Text>
-       <Text style={styles.welcome}>{this.state.introText}</Text>
+
+      <AppIntroSlider
+        slides={slides}
+        renderItem={this._renderItem}
+        paginationStyle={{bottom: 0}}
+        showSkipButton={false}
+        showPrevButton={false}
+        showNextButton={false}
+        showDoneButton={false}
+      />
+
 
        <View style={styles.logInContainer}>
         <View style={{ flex: 10, paddingLeft: 10 }}>
@@ -316,7 +367,7 @@ export default class SignedOut extends Component<Props> {
             onChangeText={(text) => this.setState({auth: text})}
             value={this.state.auth}
             placeholder={this.state.placeholder}
-            placeholderTextColor="#999"
+            placeholderTextColor="#fff"
             password={true}
             secureTextEntry={this.state.showPassword}
             autoCapitalize = 'none'
@@ -329,7 +380,7 @@ export default class SignedOut extends Component<Props> {
         <TouchableOpacity style={styles.buttonAuth} onPress={this._onPress}>
           <Icono name="ios-arrow-dropright" style={styles.pressLogIn} />
         </TouchableOpacity>
-         
+          {Platform.OS == 'ios' && <KeyboardSpacer /> }
       </View>
       <Toast
                     ref="toast"
@@ -341,10 +392,9 @@ export default class SignedOut extends Component<Props> {
                     opacity={0.8}
                     textStyle={{color:'white'}}
                 />
-      </ImageBackground>
 
 
-        <KeyboardSpacer/>
+       
       </View>
 
 
@@ -389,7 +439,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent', 
      alignSelf: 'flex-start',
      width: '100%',
-    borderWidth: 1
+    borderWidth: 1,
+    color: '#f4f4f0'
   },
   imgBackground: {
     justifyContent: 'center',
@@ -447,5 +498,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 80
+  },
+    mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  image: {
+    width: 320,
+    height: 320,
+  },
+  text: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    fontSize: 17,
+    paddingRight: 20,
+    paddingLeft: 20
+  },
+  title: {
+    fontSize: 26,
+    color: 'white',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    marginBottom: 16,
   }
 });

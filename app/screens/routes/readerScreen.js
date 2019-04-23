@@ -20,7 +20,6 @@ let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME);
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
-
 export default class ReaderScreen extends Component<Props>{
       static navigationOptions = ({ navigation }) => {
           console.log("navigation options!")
@@ -142,6 +141,16 @@ export default class ReaderScreen extends Component<Props>{
                 console.log("on location ready!", locations.total)
                 this.props.navigation.setParams({
                       TotalPages: locations.total
+                    });
+                APILocal.upsert(this.state._id, doc => {
+                      
+                        doc.offline = true;
+                      
+                      return doc;
+                    }).then((res) => {
+                      console.log("onLocationsReady", res)
+                    }).catch((err) => {
+
                     });
                 this.setState({sliderDisabled : false});
               }}

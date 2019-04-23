@@ -16,6 +16,8 @@ import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import SortableList from 'react-native-sortable-list';
 import Modal from 'react-native-modalbox';
+import { getLang, Languages } from '../../../static/languages';
+
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
@@ -40,12 +42,19 @@ export default class ChaptersScreen extends Component<Props>{
             title_chapter: null,
             isLoading: true,
             chapters: null,
-            placeholder: 'Add chapter',
-            placeholderEditTitle: 'Edit title of chapter',
-            countChapters: 0
+            placeholder: Languages.addChapter[getLang()],
+            placeholderEditTitle: Languages.editTitleChapter[getLang()],
+            countChapters: 0,
+            color: 'red',
+            swipeToClose: true,
+            isOpen: false
         };
+        
     }
     componentDidMount() {
+        this._renderAllChapter();
+    }
+    _renderAllChapter = () => {
         APILocalDrafts.get(this.state._id).then(doc => {
             console.log("Component did mount")
             console.log("ChapterScreen Props", this.props)
@@ -177,11 +186,35 @@ export default class ChaptersScreen extends Component<Props>{
         });  */
   }
 
+  _checkIfNone = () => {
+
+    console.log("check if none chapters", this.state.chapters.length)
+
+    if(this.state.chapters.length == 0){
+      return (
+        <View style={{alignItems: 'center',justifyContent: 'center', flex: 1, marginTop: 100}}>
+              <EntypoIcono name="book" style={{color: '#8b40d0', fontSize: 55}}></EntypoIcono>
+              <Text style={{color: '#666', fontSize: 18, marginTop: 15, textAlign: 'center'}}>{Languages.noChaptersCreated[getLang()]}</Text>
+        </View>
+      );
+    }
+  }
   _onRenderRow = (book) => {
       return <Row data={book} active={book.active} onDelete={this._onDelete} navigation={this.props.navigation}/>
   }
 
-  
+  _onOpenModal = () => {
+      console.log("Open!")
+      console.log("Open modal!", this.props.navigation.state.params);
+      
+      this.setState({isOpen: true});
+
+  }
+  _onEdit = () => {
+      this.props.navigation.state.params.onEdit(this.state._id, this.state.title);
+      this.setState({isOpen: false});
+  }
+
     render(){
         const {data, isLoading} = this.state;
         if (this.state.isLoading == true && this.state.chapters == null) {
@@ -200,16 +233,16 @@ export default class ChaptersScreen extends Component<Props>{
         
                 <View>
 
-                <TouchableHighlight style={{backgroundColor: '#111', width: 50, height: 50, margin: 10, padding: 12, borderRadius: 10}} onPress={() => this.refs.editBookTitle.open()}>
+                <TouchableHighlight style={{backgroundColor: '#111', width: 50, height: 50, margin: 10, padding: 12, borderRadius: 10}} onPress={() => this._onOpenModal()}>
                     <EntypoIcono name="edit" style={{color: '#ffffff', fontSize: 23}}></EntypoIcono>
                 </TouchableHighlight>
                         <Text style={{color: '#222', position: 'absolute', top: 4, left: 55, fontSize: 20, margin: 20, fontWeight: 'bold', letterSpacing: 0.5, textAlign: 'left', alignItems: 'center'}}>
-                            {this.state.title}
+                            {this.state.title != null ? this.state.title : 'Untitled'}
                         </Text>
 
                 </View>
                 <View style={styles.container}>
-             
+                     {this._checkIfNone()}
            <SortableList
               style={{flex: 1}}
               //contentContainerStyle={styles.contentContainer}
@@ -258,7 +291,7 @@ export default class ChaptersScreen extends Component<Props>{
                       />
                     </View>
                     
-                    <TouchableOpacity style={styles.buttonCreateBook} onPress={this._onCreate}>
+                    <TouchableOpacity style={styles.buttonCreateBook} onPress={this._onEdit}>
                       <Icono name="ios-add-circle-outline" style={styles.pressCreateBook} />
                     </TouchableOpacity>
                      
@@ -266,14 +299,14 @@ export default class ChaptersScreen extends Component<Props>{
 
                   
              </View>
-             <KeyboardSpacer />
+             {Platform.OS == 'ios' && <KeyboardSpacer /> }
              </LinearGradient>
-              <Modal style={[styles.modal, styles.modal4]} position={"bottom"} ref={"editBookTitle"}>
+              <Modal style={[styles.modal, styles.modal4]} position={"top"} ref={"editBookTitle"} keyboardTopOffset={0} isOpen={this.state.isOpen} swipeToClose={this.state.swipeToClose}>
                  
                   <TextInput
                         onChangeText={(text) => this.setState({title: text})}
-                        style={{ position: 'absolute', left: 18, fontSize: 18}}
-                        value={this.state.title}
+                        style={{ position: 'absolute', left: 18, fontSize: 18, width: ancho - 100, height: 50}}
+                        value={this.state.title != null ? this.state.title : 'Untitled'}
                         placeholder={this.state.placeholderEditTitle}
                         placeholderTextColor="#999"
                         password={true}
@@ -281,12 +314,23 @@ export default class ChaptersScreen extends Component<Props>{
                         autoCapitalize = 'none'
                       />
 
-                  <TouchableHighlight style={{backgroundColor: '#111', width: 50, height: 50, padding: 14, position: 'absolute', right: 18, borderRadius: 10}}>
+                  <TouchableHighlight style={{backgroundColor: '#111', width: 50, height: 50, padding: 14, position: 'absolute', right: 18, borderRadius: 10}}  onPress={this._onEdit}>
                       <EntypoIcono style={{color: '#ffffff', fontSize: 20}} name="check"></EntypoIcono>
                   </TouchableHighlight>
-                      <KeyboardSpacer />
+                      
                 </Modal>
+                <Toast
+                    ref="toast"
+                    style={{backgroundColor:this.state.color}}
+                    position='bottom'
+                    positionValue={200}
+                    fadeInDuration={750}
+                    fadeOutDuration={1000}
+                    opacity={0.8}
+                    textStyle={{color:'white'}}
+                />
           </View>
+
         );
     }
     }
@@ -298,7 +342,10 @@ class Row extends Component {
     super(props);
     console.log("this props Row Chapters", this.props)
     this._active = new Animated.Value(0);
-
+    const {data, active} = this.props;
+    this.state = {
+        title : data.data.title
+    }
     this._style = {
       ...Platform.select({
         ios: {
@@ -340,10 +387,32 @@ class Row extends Component {
     }
   }
 
+  _onEditTitleChapter = (id, title) => {
+      console.log("Title id", id, title)
+      this.setState({title: title})
+      APILocalChapters.upsert(id, doc => {
+                      doc.title = title;
+                      return doc;
+                    }).then((res) => {
+                        
+                        console.log("Changed!", res) 
+
+                        this.setState({color: '#36ca41'});
+                        this.refs.toast.show('The title has been changed', 2000);
+                      // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                    }).catch((error) => {
+                        this.setState({color: 'red'});
+                        this.refs.toast.show('Something went wrong', 2000);
+                      console.log("Error creating book", error)
+                      // error
+                    });
+  }
 
   _onPress = (book) => {
+      console.log("Book", book)
     this.props.navigation.navigate('ChapterDetails',{
-                                        dataChapter: book
+                                        dataChapter: book,
+                                        onEditTitle: (id, title) => this._onEditTitleChapter(id, title)
                                       });
   }
 
@@ -396,7 +465,7 @@ class Row extends Component {
                   <View style={styles.standaloneRowFront}>
 
                     <Text style={{position: 'absolute', color: '#111', left: 23, top: 20, fontWeight: 'bold', letterSpacing: 0.5, fontSize: 18, flexShrink: 1, width: ancho - 100}} ellipsizeMode='tail'>
-                      {data.data.title.toUpperCase()}
+                      {this.state.title.toUpperCase()}
                     </Text>
                   </View>
                   </TouchableHighlight>

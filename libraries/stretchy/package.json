@@ -1,0 +1,60 @@
+{
+  "_from": "react-native-stretchy",
+  "_id": "react-native-stretchy@2.0.1",
+  "_inBundle": false,
+  "_integrity": "sha512-gBvTGjQFJRbr3PU3YZ9aCq8My1jmq2jVMZbnAwEmI4fiG+4bhisibjI3UC4uroOIyAgqy0OFlNoIKrnO3PAUiQ==",
+  "_location": "/react-native-stretchy",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "react-native-stretchy",
+    "name": "react-native-stretchy",
+    "escapedName": "react-native-stretchy",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-native-stretchy/-/react-native-stretchy-2.0.1.tgz",
+  "_shasum": "2844a85f037c595b96b0d918202b973994111df3",
+  "_spec": "react-native-stretchy",
+  "_where": "/Users/development/React/Typings",
+  "author": {
+    "name": "Hamid Hadi",
+    "email": "hamidhadi@live.com",
+    "url": "https://github.com/hamidhadi"
+  },
+  "bugs": {
+    "url": "https://github.com/hamidhadi/react-native-stretchy/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "react-native-linear-gradient": "^2.4.0"
+  },
+  "deprecated": false,
+  "description": "A ReactNative scrollable stretchy header component",
+  "homepage": "https://github.com/hamidhadi/react-native-stretchy#readme",
+  "keywords": [
+    "react",
+    "react-native",
+    "scrollview",
+    "stretchy",
+    "stretch-view",
+    "component"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "react-native-stretchy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamidhadi/react-native-stretchy.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "2.0.1"
+}

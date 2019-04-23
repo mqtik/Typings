@@ -108,6 +108,16 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+        release {
+            if (project.hasProperty('APP_RELEASE_STORE_FILE')) {
+                storeFile file(APP_RELEASE_STORE_FILE)
+                storePassword APP_RELEASE_STORE_PASSWORD
+                keyAlias APP_RELEASE_KEY_ALIAS
+                keyPassword APP_RELEASE_KEY_PASSWORD
+            }
+        }
+    }
     splits {
         abi {
             reset()
@@ -118,6 +128,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -136,11 +147,20 @@ android {
         }
     }
 }
-
+subprojects {
+    afterEvaluate {project ->
+    // force libs to use recent buildtools
+        if (project.hasProperty("android")) {
+            android {
+                compileSdkVersion = rootProject.ext.minSdkVersion  // change to match your desired version
+                buildToolsVersion = rootProject.ext.buildToolsVersion // ....
+            }
+        }
+    }
+}
 dependencies {
     compile project(':react-native-vector-icons')
     compile project(':rn-fetch-blob')
-    compile project(':react-native-fetch-blob')
     compile project(':react-native-svg')
     compile project(':react-native-smart-splash-screen')
     compile project(':react-native-orientation')
@@ -161,8 +181,3 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-
-project.afterEvaluate {
-    apply from: '../../node_modules/react-native-zss-rich-text-editor/htmlCopy.gradle';
-    copyEditorHtmlToAppAssets(file('../../node_modules/react-native-zss-rich-text-editor'))
-}

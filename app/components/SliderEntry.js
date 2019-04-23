@@ -5,6 +5,10 @@ import { ParallaxImage } from 'react-native-snap-carousel';
 import styles from '../styles/SliderEntry.style';
 import { API_URL, API_STATIC, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
+import {
+    CachedImage,
+    ImageCacheProvider
+} from 'react-native-cached-image';
 
 type Props = { navigation: Function, onDocPress: Function }
 export default class SliderEntry extends Component {
@@ -33,10 +37,7 @@ export default class SliderEntry extends Component {
               {...parallaxProps}
             />
         ) : (
-            <Image
-              source={{ uri: API_STATIC+'/covers/'+cover }}
-              style={styles.image}
-            />
+            <CachedImage style={styles.image} source={{uri: API_STATIC+'/covers/'+cover}}/>
         );
     }
 

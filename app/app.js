@@ -22,7 +22,7 @@ import {  API_URL,
           SETTINGS_LOCAL_DB_NAME 
   } from 'react-native-dotenv'
 import { createStackNavigator, createAppContainer, NavigationActions } from 'react-navigation';
-
+import { fadeIn } from 'react-navigation-transitions';
 /**
  * Screens
  * Navigation
@@ -69,7 +69,7 @@ const Routes = createStackNavigator({
               },*/
        }
     }
-}, { initialRouteName: initRoute });
+}, { initialRouteName: initRoute, transitionConfig: () => fadeIn(), });
 
 const AppNavigator = createAppContainer(Routes);
 module.exports = Routes;

@@ -13,6 +13,8 @@ npm install
 4. react-native link react-native-static-server && react-native link react-native-webview && react-native link react-native-zip-archive && RNFB_ANDROID_PERMISSIONS=true react-native link rn-fetch-blob && react-native link react-native-orientation
 5. react-native link react-native-dialogs
 6. react-native link react-native-vector-icons
+7. RNFB_ANDROID_PERMISSIONS=true react-native link react-native-fetch-blob
+
 # Clean Install
 lsof -ti :8081 | xargs kill -9
 npm start -- --reset-cache
@@ -22,6 +24,31 @@ npm start -- --reset-cache
 react-native run-ios
 
 react-native run-android
+
+# Release on Android
+
+./gradlew assembleRelease
+
+On node_modules/react-native/react.grandle
+Place this code where doFirst{} method is
+		`
+		doLast {
+            def moveFunc = { resSuffix ->
+                File originalDir = file("$buildDir/generated/res/react/release/drawable-${resSuffix}");
+                if (originalDir.exists()) {
+                    File destDir = file("$buildDir/../src/main/res/drawable-${resSuffix}");
+                    ant.move(file: originalDir, tofile: destDir);
+                }
+            }
+            moveFunc.curry("ldpi").call()
+            moveFunc.curry("mdpi").call()
+            moveFunc.curry("hdpi").call()
+            moveFunc.curry("xhdpi").call()
+            moveFunc.curry("xxhdpi").call()
+            moveFunc.curry("xxxhdpi").call()
+        }
+        `
+
 
 
 ## Errors

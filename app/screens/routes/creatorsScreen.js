@@ -15,7 +15,7 @@ import inStyle from '../../styles/creatorsScreen.style';
 import uuid from 'react-native-uuid';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
-
+import { getLang, Languages } from '../../static/languages';
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
@@ -35,11 +35,11 @@ export default class CreatorsScreen extends Component<Props>{
       this.state = {
          introText: '',
          title_book: null,
-         placeholder: 'Type book title',
+         placeholder: Languages.typeBookTitle[getLang()],
          color: 'red',
          exist: 'false',
          isLoading: true,
-         listType: 'Drafts',
+         listType: Languages.Drafts[getLang()],
          docs: null
       }
 
@@ -48,35 +48,15 @@ export default class CreatorsScreen extends Component<Props>{
    }
 
    componentDidMount(){
-     APILocalDrafts.allDocs({
+     this._renderDrafts();
+   }
+
+   _renderDrafts = () => {
+          APILocalDrafts.allDocs({
             include_docs: true,
             attachments: true
           }).then(result => {
             console.log("ALL CREATORS DOCS")
-            console.log(result);
-            let books = result.rows.map(function (row) { return row.doc; });  
-            let booksNow = _.filter(books, function(item){
-                            return item.archive == false
-                         }); 
-            let booksArchived = _.filter(books, function(item){
-                            return item.archive == true
-                         });
-                        
-            this.setState({docs: booksNow, archive: booksArchived, isLoading: false})
-            console.log("books archived!", booksArchived)
-          }).catch(err => {
-            console.log(err);
-          
-          });
-   }
-
-   _renderDrafts = () => {
-
-     APILocalDrafts.allDocs({
-            include_docs: true,
-            attachments: true
-          }).then(result => {
-            console.log("ALL RENDER DRAFTS DOCS")
             console.log(result);
             let books = result.rows.map(function (row) { return row.doc; });  
             let booksNow = _.filter(books, function(item){
@@ -124,17 +104,37 @@ export default class CreatorsScreen extends Component<Props>{
 
   _onPress = (book) => {
     this.props.navigation.navigate('Chapters',{
-                                        dataBook: book
+                                        dataBook: book,
+                                        onEdit: (id, title) => this._onEdit(id, title)
                                       });
   }
 
+  _onEdit = (id, title) => {
+      console.log("Title id", id, title)
+      APILocalDrafts.upsert(id, doc => {
+                      doc.title = title;
+                      return doc;
+                    }).then((res) => {
+                        
+                        console.log("Changed!", res) 
+                        this._renderDrafts();
+                        this.setState({color: '#36ca41'});
+                        this.refs.toast.show('The title has been changed', 2000);
+                      // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                    }).catch((error) => {
+                        this.setState({color: 'red'});
+                        this.refs.toast.show('Something went wrong', 2000);
+                      console.log("Error creating book", error)
+                      // error
+                    });
+  }
  
   _onDelete = (book, section) => {
       let books;
       console.log("section!", section)
-      if(section == 'Drafts'){
+      if(section == Languages.Drafts[getLang()]){
           books = this.state.docs;
-        } else if (section == 'Archive') {
+        } else if (section == Languages.Archive[getLang()]) {
           books = this.state.archive;
         }
           Alert.alert(
@@ -147,13 +147,13 @@ export default class CreatorsScreen extends Component<Props>{
                     APILocalDrafts.get(book._id).then((doc) => {
                       console.log("doc!", doc)
                       
-                      if(section == 'Drafts'){
+                      if(section == Languages.Drafts[getLang()]){
                         console.log("deleting")
                         let newData = [...this.state.docs];
                         let prevIndex = this.state.docs.findIndex(item => item._id === book._id);
                         newData.splice(prevIndex, 1);
                           this.setState({docs: newData});
-                        } else if (section == 'Archive') {
+                        } else if (section == Languages.Archive[getLang()]) {
                           let newData = [...this.state.archive];
                           let prevIndex = this.state.archive.findIndex(item => item._id === book._id);
                           newData.splice(prevIndex, 1);
@@ -177,9 +177,9 @@ export default class CreatorsScreen extends Component<Props>{
    _onArchive = (book, section) => {
       let books;
       console.log("section!", section)
-      if(section == 'Drafts'){
+      if(section == Languages.Drafts[getLang()]){
           books = this.state.docs;
-        } else if (section == 'Archive') {
+        } else if (section == Languages.Archive[getLang()]) {
           books = this.state.archive;
         }
 
@@ -189,14 +189,14 @@ export default class CreatorsScreen extends Component<Props>{
                     }).then((res) => {
 
                         console.log("section!")
-                      if(section == 'Drafts'){
+                      if(section == Languages.Drafts[getLang()]){
                         console.log("Drafting")
                         let newData = [...this.state.docs];
                         let prevIndex = this.state.docs.findIndex(item => item._id === book._id);
                         newData.splice(prevIndex, 1);
                           this.setState({docs: newData});
                           console.log("This state docs!", this.state.docs);
-                        } else if (section == 'Archive') {
+                        } else if (section == Languages.Archive[getLang()]) {
                           console.log("Archiving")
                           let newData = [...this.state.archive];
                           let prevIndex = this.state.archive.findIndex(item => item._id === book._id);
@@ -210,12 +210,29 @@ export default class CreatorsScreen extends Component<Props>{
                     });
   }
 
+  _checkIfNone = () => {
+    if(this.state.listType == Languages.Drafts[getLang()]){
+      books = this.state.docs;
+    } else if (this.state.listType == Languages.Archive[getLang()]) {
+      books = this.state.archive;
+    } 
+    console.log("check if none", books.length)
+
+    if(books.length == 0){
+      return (
+        <View style={{alignItems: 'center',justifyContent: 'center', flex: 1, marginTop: 100}}>
+             <EntypoIcono name="colours" style={{color: '#ffffff', fontSize: 55}}></EntypoIcono>
+              <Text style={{color: '#fff', fontSize: 18, marginTop: 15, textAlign: 'center'}}>{Languages.noBooksCreated[getLang()]}</Text>
+       </View>
+      );
+    }
+  }
 
   render(){
     let books;
-    if(this.state.listType == 'Drafts'){
+    if(this.state.listType == Languages.Drafts[getLang()]){
       books = this.state.docs;
-    } else if (this.state.listType == 'Archive') {
+    } else if (this.state.listType == Languages.Archive[getLang()]) {
       books = this.state.archive;
     }  
       if(this.state.docs){
@@ -224,7 +241,7 @@ export default class CreatorsScreen extends Component<Props>{
 
             <View style={styles.controls}>
           <View style={styles.switchContainer}>
-            { ['Drafts', 'Archive'].map( type => (
+            { [Languages.Drafts[getLang()], Languages.Archive[getLang()]].map( type => (
               <TouchableOpacity
                 key={type}
                 style={[
@@ -240,10 +257,13 @@ export default class CreatorsScreen extends Component<Props>{
         
         </View>
             <ScrollView style={{backgroundColor: '#222', height: alto}}>
-            
+            {this._checkIfNone()}
+
             <View style={styles.container}>
-              { books.map(book => (
-              <View style={styles.standalone} key={book._id}>
+            
+              { books.map(book => ( 
+
+                <View style={styles.standalone} key={book._id}>
                 <SwipeRow
                   leftOpenValue={75}
                   rightOpenValue={-75}
@@ -290,7 +310,7 @@ export default class CreatorsScreen extends Component<Props>{
                       <EntypoIcono name="open-book" style={{ color: '#fff', fontSize: 30, marginLeft: 20, marginTop: 24}}/>
                     </TouchableOpacity>
                     <Text style={{position: 'absolute', color: '#f4f4f0', left: 23, top: 20, fontSize: 16, fontWeight: 'bold', letterSpacing: 0.5, flexShrink: 1, width: ancho - 100}} ellipsizeMode='tail'>
-                      {book.title.toUpperCase()}
+                      {book.title != null ? book.title.toUpperCase() : 'Untitled'}
                     </Text>
                   </View>
                   </TouchableHighlight>
@@ -349,7 +369,8 @@ export default class CreatorsScreen extends Component<Props>{
 
                   
              </View>
-             <KeyboardSpacer />
+             {Platform.OS == 'ios' && <KeyboardSpacer /> }
+             
              </LinearGradient>
              </View>
 

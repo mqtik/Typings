@@ -13,6 +13,7 @@ import Toast, {DURATION} from 'react-native-easy-toast'
 import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC, SETTINGS_LOCAL_DB_NAME, LOCAL_DB_DRAFTS, LOCAL_DB_CHAPTERS } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+import { getLang, Languages } from '../../../static/languages';
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
@@ -50,18 +51,25 @@ export default class ChapterDetailsScreen extends Component<Props>{
         this.state = {
             title: doc.title,
             _id: doc._id,
+            content: doc.content,
             title_chapter: null,
             isLoading: true,
             chapters: null,
             placeholder: 'Add chapter',
-            countChapters: 0
+            countChapters: 0,
+            color: 'red',
+            placeholderEditTitle: Languages.placeholderEditTitle[getLang()]
         };
+        this._onChangeTextDelayed = _.debounce(this._onChangeText, 2000);
         this.props.navigation.setParams({
           Title: doc.title
         });
     }
     componentDidMount() {
-        APILocalChapters.get(this.state._id).then(doc => {
+        this._renderChapter();
+    }
+    _renderChapter = () => {
+      APILocalChapters.get(this.state._id).then(doc => {
             
             console.log("Get chapter")
             console.log(doc);
@@ -75,8 +83,24 @@ export default class ChapterDetailsScreen extends Component<Props>{
           
         });
     }
- 
-
+    _onChangeText = (text) => {
+      console.log("debouncing", text, this.state._id);
+            APILocalChapters.upsert(this.state._id, doc => {
+                      doc.content = this.state.content;
+                      return doc;
+                    }).then((res) => {
+                        
+                        console.log("Changed!", res) 
+                        this.setState({color: '#36ca41'});
+                        this.refs.toast.show('Saved', 1000);
+                      // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
+                    }).catch((error) => {
+                        this.setState({color: 'red'});
+                        this.refs.toast.show('Something went wrong', 2000);
+                      console.log("Error creating book", error)
+                      // error
+                    });
+    }
      _onDelete = (book) => {
       console.log("Book to delete:", book)
           Alert.alert(
@@ -110,7 +134,10 @@ export default class ChapterDetailsScreen extends Component<Props>{
           );
   }
 
-
+  _onEditTitle = () => {
+    console.log("edit text!", this.props.navigation.state.params)
+    this.props.navigation.state.params.onEditTitle(this.state._id, this.state.title);
+  }
   
     render(){
         const {data, isLoading} = this.state;
@@ -128,15 +155,46 @@ export default class ChapterDetailsScreen extends Component<Props>{
            <View style={{flex: 1}}>
               
         
-                <View>
-                        <Text style={{color: '#222', fontSize: 26, margin: 20, fontWeight: '500', textAlign: 'left', alignItems: 'center'}}>
-                            {this.state.title}
-                        </Text>
-                        
+                <View style={styles.editTitleContainer}>
+                    <TextInput
+                            onChangeText={(text) => this.setState({title: text})}
+                            style={{ position: 'absolute', left: 18, fontSize: 18, width: ancho - 100, height: 50, marginTop: 10}}
+                            value={this.state.title != null ? this.state.title : 'Untitled'}
+                            placeholder={this.state.placeholderEditTitle}
+                            placeholderTextColor="#999"
+                            password={true}
+                            secureTextEntry={false}
+                            autoCapitalize = 'none'
+                          />
+
+                      <TouchableHighlight style={{backgroundColor: '#111', width: 50, height: 50, padding: 14, marginTop: 10, position: 'absolute', right: 18, borderRadius: 10}}  onPress={this._onEditTitle}>
+                          <EntypoIcono style={{color: '#ffffff', fontSize: 20}} name="check"></EntypoIcono>
+                      </TouchableHighlight>    
                 </View>
                 
-            
-           
+                <View style={styles.textAreaContainer} >
+                    <TextInput
+                      style={styles.textArea}
+                      underlineColorAndroid="transparent"
+                      placeholder={Languages.typeSomething[getLang()]}
+                      placeholderTextColor="grey"
+                      numberOfLines={10}
+                      value={this.state.content}
+                      multiline={true}
+                      onChangeText={(text) => { this.setState({content: text}); this._onChangeTextDelayed();}}
+                      
+                    />
+                  </View>
+           <Toast
+                    ref="toast"
+                    style={{backgroundColor:this.state.color}}
+                    position='top'
+                    positionValue={200}
+                    fadeInDuration={750}
+                    fadeOutDuration={1000}
+                    opacity={0.8}
+                    textStyle={{color:'white'}}
+                />
           </View>
         );
     }
@@ -148,125 +206,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  standalone: {
-    margin: 10,
-    marginBottom: 0
-  },
-  standaloneRowFront: {
-    backgroundColor: '#fff',
-    height: 100,
-    borderRadius: 10,
-    shadowColor: '#4b2a69',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
-    shadowRadius: 1,  
-    elevation: 5
-  },
-  standaloneRowBack: {
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    flex: 1,
-    flexDirection: 'row',
-    padding: 0,
-    height: 100,
-    borderRadius: 10,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start'
-  },
-  TextArchive: {
-    color: '#FFF',
-    position: 'absolute',
-    left: 20,
-    top: 34
-  },
-  TextDelete: {
-    position: 'absolute',
-    right: 20,
-    top: 34,
-    color: '#FFF'
-  },
-  imageCover: {
-    height: 150,
-    width: 70,
-    backgroundColor: '#111',
-    borderRadius: 10,
-    flex: 1, 
-    flexDirection: 'row', justifyContent: 'flex-start',
-    margin: 10
-  },
-  controls: {
-    alignItems: 'center',
-    marginBottom: 0
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 0,
-    backgroundColor: '#713671'
-  },
-  switch: {
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d2d2d2',
-    paddingVertical: 10,
-    width: Dimensions.get('window').width / 2,
-  },
-
-  inputTitleBook: {
-    height: 50, 
-    fontSize: 20,
-    borderColor: 'transparent', 
-     alignSelf: 'flex-start',
-     width: '100%',
-    borderWidth: 1
-  },
-  imgBackground: {
-    justifyContent: 'center',
-    alignItems: 'center',
-        width: '100%',
-        height: '100%',
-        flex: 1
-},
-  pressCreateBook: {
-    fontSize: 30, 
-    marginTop: 9,
-    marginRight: 10,
-    color: '#fff',
-    borderWidth: 0,
-  },
-  buttonCreateBookBack: { 
-    borderRadius: 30,
-    width: 10,
-    backgroundColor: "#111",
-    flex: 1, 
-    paddingRight: 10,
-    marginRight: 10
-  },
-  buttonCreateBook: { 
-        borderRadius: 30,
-        width: 50,
-        height: 50,
-    backgroundColor: "#111",
-    flex: 0,
-    paddingLeft: 12,
-    paddingTop: 1
-  },
-  bookTitleContainer: {
-      flex: 1, 
-      flexDirection: 'row',
-    borderRadius: 33,
-    padding: 10,
-    borderWidth: 0.1,
-    borderColor: 'white',
-    backgroundColor: 'white',
-    shadowColor: 'rgba(0,0,0,0.3)',
-    shadowOffset: {
-      width: 0,
-      height: 3
-    },
-    shadowRadius: 10,
-    shadowOpacity: 1,
-    width: '90%'
+  editTitleContainer: {
+    borderBottomWidth: 1,
+    height: 72,
+    backgroundColor: '#ddd',
+    borderColor: '#eaeaea' 
   },
   indicator: {
     flex: 1,
@@ -274,7 +218,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 80
   },
-   row: {
-        height: 120,
+    textAreaContainer: {
+    borderColor: '#eaeaea',
+    borderWidth: 0,
+    padding: 15,
+    height: alto
   },
+  textArea: {
+    fontSize: 19,
+    height:alto - 270,
+    justifyContent: "flex-start"
+  }
 });

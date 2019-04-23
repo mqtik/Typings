@@ -1,13 +1,13 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
+ * Typings SignedIn
+ * typings.co
  *
  * @format
  * @flow
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Animated, Easing } from 'react-native';
+import {Platform, StyleSheet, Text, TextInput, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Animated, Easing, NativeModules } from 'react-native';
 import Icon from 'react-native-fa-icons';
 import Icono from 'react-native-vector-icons/Ionicons';
 import EntypoIcono from 'react-native-vector-icons/Entypo';
@@ -26,6 +26,8 @@ import { ENTRIES1, ENTRIES2 } from '../static/entries';
 import { scrollInterpolators, animatedStyles } from '../utils/animations';
 
 import { createBottomTabNavigator, createStackNavigator, createAppContainer, HeaderBackButton, NavigationActions, StackActions } from 'react-navigation';
+
+// Routes
 import DocScreen from './routes/docScreen.js';
 import ReaderScreen from './routes/readerScreen.js';
 import ExploreScreen from './routes/exploreScreen.js';
@@ -33,6 +35,9 @@ import CreatorsScreen from './routes/creatorsScreen.js';
 import ChaptersScreen from './routes/creators/chaptersScreen.js';
 import ChapterDetailsScreen from './routes/creators/chapterDetailsScreen.js';
 import SettingsScreen from './routes/settingsScreen.js';
+
+// Languages
+import { getLang, Languages } from '../static/languages';
 
 
 PouchDB.plugin(APIAuth);
@@ -55,7 +60,6 @@ const instructions = Platform.select({
 type Props = { navigation: Function }
 
 
-
 /*  db.sync('https://'userID':'userPASS'@'serverIP':6984/DBname', {
       live: true
     }).on('change', function (change) {
@@ -71,27 +75,35 @@ export default class SignedIn extends React.Component {
   constructor(props) {
       super(props);
       console.log("this props signed IN!", this.props);
+      console.log("Get language!", getLang())
+      console.log("Languages started!", Languages.bottomBarCreators[getLang()])
    }
 
     _onLogout = () => {
-      console.log("Siging out")
+      console.log("Siging out", this.props)
           API.logOut((err, response) => {
         if (err) {
           // network error
           console.log("on error", err)
           return null;
         }
+        
         console.log("signedIn onLogout: ", response)
-        APILocalSettings.destroy().then(res => {
-          APILocalSettings = new PouchDB(SETTINGS_LOCAL_DB_NAME);
-          console.log("signedIn: Destroying settings of user!", res)
-          const resetAction = StackActions.reset({
-                index: 0,
-                actions: [NavigationActions.navigate({ routeName: 'SignedOut' })],
+          APILocal.destroy().then(res => {
+            APILocalSettings.destroy().then(resp => {
+                APILocal = PouchDB(LOCAL_DB_NAME);
+                APILocalSettings = new PouchDB(SETTINGS_LOCAL_DB_NAME);
+                const resetAction = StackActions.reset({
+                                      index: 0,
+                                      actions: [NavigationActions.navigate({ routeName: 'SignedOut' })]
+                                  });
+                this.props.navigation.dispatch(resetAction);
             });
-          this.props.navigation.dispatch(resetAction);
+          });
+          
 
-        });
+          
+        
       })
     }
     render() {
@@ -104,6 +116,11 @@ export default class SignedIn extends React.Component {
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -114,10 +131,15 @@ export default class SignedIn extends React.Component {
                         Details:{
                             screen: DocScreen,
                             navigationOptions: {
-                                 title: 'Details',
+                                 title: Languages.Details[getLang()],
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -131,6 +153,11 @@ export default class SignedIn extends React.Component {
                                  gesturesEnabled: true,
                                  headerStyle: {
                                     backgroundColor: '#333',
+                                    ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                  },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -145,10 +172,15 @@ export default class SignedIn extends React.Component {
                             screen: CreatorsScreen,
                             navigationOptions: {
                                  headerLeft: null,
-                                 title: 'Creators',
+                                 title: Languages.bottomBarCreators[getLang()],
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -159,10 +191,15 @@ export default class SignedIn extends React.Component {
                         Chapters:{
                             screen: ChaptersScreen,
                             navigationOptions: {
-                                 title: 'Chapters',
+                                 title: Languages.Chapters[getLang()],
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -176,6 +213,11 @@ export default class SignedIn extends React.Component {
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -190,10 +232,15 @@ export default class SignedIn extends React.Component {
                             screen: SettingsScreen,
                             navigationOptions: {
                                  headerLeft: null,
-                                 title: 'Settings',
+                                 title: Languages.bottomBarSettings[getLang()],
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
+                                  ...Platform.select({
+                                          android: {
+                                            marginTop: 24,
+                                          },
+                                        })
                                    },
                                  headerTintColor: '#fff',
                                  headerTitleStyle: {
@@ -208,7 +255,7 @@ export default class SignedIn extends React.Component {
             Library: {
              screen: HomeNavigator,
                  navigationOptions: {
-                    tabBarLabel:"Explore",
+                    tabBarLabel: Languages.bottomBarExplore[getLang()],
                     tabBarIcon: ({ tintColor }) => (
                        <Icono name="ios-git-branch" size={20} style={{color: tintColor}} />
                     )
@@ -217,7 +264,7 @@ export default class SignedIn extends React.Component {
             Creators: { 
               screen: CreatorsNavigator,
               navigationOptions: {
-                    tabBarLabel:"Creators",
+                    tabBarLabel:Languages.bottomBarCreators[getLang()],
                     tabBarIcon: ({ tintColor }) => (
                        <EntypoIcono name="flow-cascade" size={20} style={{color: tintColor}} />
                     )
@@ -226,7 +273,7 @@ export default class SignedIn extends React.Component {
             Settings: { 
               screen: SettingsNavigator,
               navigationOptions: {
-                    tabBarLabel:"Settings",
+                    tabBarLabel:Languages.bottomBarSettings[getLang()],
                     tabBarIcon: ({ tintColor }) => (
                        <Icono name="ios-git-compare" size={20} style={{color: tintColor}} />
                     )
@@ -243,8 +290,7 @@ export default class SignedIn extends React.Component {
               style: {
                 backgroundColor: '#111',
               }
-            },
-            onLogout: this._onLogout
+            }
         });
         const MainNavigator = createAppContainer(TabNavigation);
         // return (
