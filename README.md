@@ -1,8 +1,3 @@
-# Get started
-Clone repository
---URL Repository git
-
-
 # Install
 npm install
 
