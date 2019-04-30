@@ -112,7 +112,6 @@ export default class SignedIn extends React.Component {
                             screen: ExploreScreen,
                             navigationOptions: {
                                  headerLeft: null,
-                                 title: 'Typings',
                                  gesturesEnabled: true,
                                  headerStyle: {
                                   backgroundColor: '#333',
@@ -126,6 +125,7 @@ export default class SignedIn extends React.Component {
                                  headerTitleStyle: {
                                    fontWeight: '200',
                                   },
+
                            }
                         },
                         Details:{
@@ -145,7 +145,8 @@ export default class SignedIn extends React.Component {
                                  headerTitleStyle: {
                                    fontWeight: '200',
                                   },
-                           }
+                           },
+                           headerBackTitle: null
                         },
                         Reader:{
                             screen: ReaderScreen,
@@ -163,6 +164,7 @@ export default class SignedIn extends React.Component {
                                  headerTitleStyle: {
                                    fontWeight: '200',
                                   },
+                                   headerBackTitle: null
                            }
                         }
                     }, {initialRouteName: 'Explore'});

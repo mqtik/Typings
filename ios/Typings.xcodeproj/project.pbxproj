@@ -40,6 +40,7 @@
 		2DCD954D1E0B4F2C00145EB5 /* TypingsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* TypingsTests.m */; };
 		2DF0FFEE2056DD460020B375 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3EA31DF850E9000B6D8A /* libReact.a */; };
 		2EBDFD5B22A04BA593E42236 /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 915E69F402944F7F89E75219 /* Ionicons.ttf */; };
+		339DD14C2276683E00CE2CDF /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 339DD1162276681500CE2CDF /* libART.a */; };
 		37196A9BFFBF435C8462B078 /* libBVLinearGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 79DE480447864A0A9846FBC4 /* libBVLinearGradient.a */; };
 		464331EDAD1A4F85814FD7A7 /* libRNSVG-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BBB172BF1254257B1D20F16 /* libRNSVG-tvOS.a */; };
 		47603A1B82864E468E3CF23C /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 01B775A4739F48C0AC8B89AA /* FontAwesome5_Brands.ttf */; };
@@ -294,6 +295,20 @@
 			remoteGlobalIDString = D061F22A1E4887C4000350B4;
 			remoteInfo = RNZipArchive;
 		};
+		339DD1152276681500CE2CDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 339DD1102276681500CE2CDF /* ART.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0CF68AC11AF0540F00FF9E5C;
+			remoteInfo = ART;
+		};
+		339DD1172276681500CE2CDF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 339DD1102276681500CE2CDF /* ART.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 323A12871E5F266B004975B8;
+			remoteInfo = "ART-tvOS";
+		};
 		33ABCD302257C8D500937C74 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F71E4E86A64545F698CC0BCF /* RCTWKWebView.xcodeproj */;
@@ -470,6 +485,7 @@
 		2D02E47B1E0B4A5D006451C7 /* Typings-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Typings-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* Typings-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Typings-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		339DD1102276681500CE2CDF /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
 		3B0D9591967A4763AB447059 /* libFPStaticServer.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libFPStaticServer.a; sourceTree = "<group>"; };
 		3DD4851747C34DAA9A51D198 /* RNGestureHandler.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNGestureHandler.xcodeproj; path = "../node_modules/react-native-gesture-handler/ios/RNGestureHandler.xcodeproj"; sourceTree = "<group>"; };
 		4159227E1D3443DE82BA7BDB /* FPStaticServer.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = FPStaticServer.xcodeproj; path = "../node_modules/react-native-static-server/ios/FPStaticServer.xcodeproj"; sourceTree = "<group>"; };
@@ -524,6 +540,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				339DD14C2276683E00CE2CDF /* libART.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
@@ -789,6 +806,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		339DD1112276681500CE2CDF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				339DD1162276681500CE2CDF /* libART.a */,
+				339DD1182276681500CE2CDF /* libART-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		33ABCD2D2257C8D500937C74 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -850,6 +876,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				339DD1102276681500CE2CDF /* ART.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
@@ -1036,6 +1063,10 @@
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 339DD1112276681500CE2CDF /* Products */;
+					ProjectRef = 339DD1102276681500CE2CDF /* ART.xcodeproj */;
+				},
 				{
 					ProductGroup = 33B696872257C07900AEC4EE /* Products */;
 					ProjectRef = 79B5FD3DD66E4F01AEA206A9 /* BVLinearGradient.xcodeproj */;
@@ -1344,6 +1375,20 @@
 			fileType = archive.ar;
 			path = libRNZipArchive.a;
 			remoteRef = 3384B675224A6BB3008E2081 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		339DD1162276681500CE2CDF /* libART.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libART.a;
+			remoteRef = 339DD1152276681500CE2CDF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		339DD1182276681500CE2CDF /* libART-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libART-tvOS.a";
+			remoteRef = 339DD1172276681500CE2CDF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		33ABCD312257C8D500937C74 /* libRCTWKWebView.a */ = {

@@ -145,6 +145,38 @@ export const Languages = {
         booksFound: {
             en: 'books found',
             es: 'libros encontrados'
+        },
+        onSearch: {
+            en: 'Artist, books or gender',
+            es: 'Artistas, libros o géneros'
+        },
+        Results: {
+            en: 'Results',
+            es: 'Resultados'
+        },
+        findMoreByTag: {
+            en: 'Find your next story',
+            es: 'Encuentra tu siguiente historia'
+        },
+        thereAreNoResults: {
+            en: 'There are no results for your search',
+            es: 'No hay resultados para tu búsqueda'
+        },
+        noInternetConnection: {
+            en: 'No internet connection',
+            es: 'No tienes conexión a internet'
+        },
+        noInternetConnectionSubtitle: {
+            en: 'You can still read the books that you\'ve been reading offline',
+            es: 'Puedes continuar los libros que estabas leyendo.'
+        },
+        lastBooks: {
+            en: 'Recently added',
+            es: 'Agregados recientemente'
+        },
+        continueReading: {
+            en: 'Continue reading',
+            es: 'Continuar leyendo'
         }
 
     };

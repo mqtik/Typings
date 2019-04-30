@@ -18,7 +18,7 @@ PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
-let APILocal = PouchDB(LOCAL_DB_NAME);
+let APILocal = PouchDB(LOCAL_DB_NAME, {auto_compaction: true});
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
 export default class ReaderScreen extends Component<Props>{
       static navigationOptions = ({ navigation }) => {
@@ -27,6 +27,8 @@ export default class ReaderScreen extends Component<Props>{
           title: navigation.getParam('Title', 'Reading...'),
           //Default Title of ActionBar
             //Background color of ActionBar
+
+            headerBackTitle: null,
           headerRight: (
               <TouchableOpacity onPress={() => this._nav.show()}>
                   <Text style={{color: 'transparent'}}>
@@ -45,7 +47,7 @@ export default class ReaderScreen extends Component<Props>{
         console.log("Starting!", API_STATIC+"/epub/"+doc.data.path)
         console.log("    Title!", this.props.navigation.getParam('dataDoc', false).data.title)
 
-
+        console.log("last page was", doc.data.last_cfi)
         this.state = {
             title: doc.data.title,
             author: doc.data.author,
@@ -55,7 +57,7 @@ export default class ReaderScreen extends Component<Props>{
             _id: doc.data._id,
             isLoading: true,
             flow: "paginated", // paginated || scrolled-continuous
-            location: 6,
+            location: doc.data.last_cfi || 0,
             url: API_STATIC+"/epub/"+doc.data.path,
             src: "",
             origin: "",
@@ -91,7 +93,7 @@ export default class ReaderScreen extends Component<Props>{
         APILocal.get(this.state._id).then(doc => {
             console.log("Component did mount")
           console.log(doc);
-          this.setState({ isLoading: false })
+          this.setState({ isLoading: false, location: doc.last_cfi || 0 })
         });
 
             this.streamer.start()
@@ -107,6 +109,20 @@ export default class ReaderScreen extends Component<Props>{
           }
 
     componentWillUnmount() {
+      console.log("THIS KILL!", this.state.location)
+      console.log("Kill it all", this.state)
+      APILocal.upsert(this.state._id, doc => {
+                      
+                        doc.percentage = this.state.visibleLocation.start.percentage;
+                        doc.last_page = this.state.visibleLocation.start.location;
+                        doc.last_cfi = this.state.visibleLocation.start.cfi;
+                        doc.offline = true;
+                      return doc;
+                    }).then((res) => {
+                      console.log("onLocationsReady", res)
+                    }).catch((err) => {
+
+                    });
         this.streamer.kill();
     }
 
@@ -132,31 +148,25 @@ export default class ReaderScreen extends Component<Props>{
               onLocationChange={(visibleLocation)=> {
                 console.log("locationChanged", visibleLocation)
                 this.setState({visibleLocation});
+
+                
                 this.props.navigation.setParams({
                       Location: visibleLocation.start.location
                     });
               }}
               onLocationsReady={(locations)=> {
                 // console.log("location total", locations.total);
-                console.log("on location ready!", locations.total)
+                console.log("on location ready!", locations)
                 this.props.navigation.setParams({
                       TotalPages: locations.total
                     });
-                APILocal.upsert(this.state._id, doc => {
-                      
-                        doc.offline = true;
-                      
-                      return doc;
-                    }).then((res) => {
-                      console.log("onLocationsReady", res)
-                    }).catch((err) => {
-
-                    });
+                
                 this.setState({sliderDisabled : false});
               }}
               onReady={(book)=> {
                 // console.log("Metadata", book.package.metadata)
                 // console.log("Table of Contents", book.toc)
+                console.log("book ready!", book)
                 this.setState({
                   title : book.package.metadata.title,
                   toc: book.navigation.toc
@@ -237,6 +247,7 @@ export default class ReaderScreen extends Component<Props>{
                 shown={this.state.showBars}
                 onSlidingComplete={
                   (value) => {
+                    console.log("Spinner!", value.toFixed(6))
                     this.setState({location: value.toFixed(6)})
                   }
                 }/>

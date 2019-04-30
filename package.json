@@ -5,6 +5,10 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
+    "android:release": "cd android && ./gradlew assembleRelease",
+    "android:clean": "cd android && ./gradlew clean",
+    "android:run:apk": "adb install -r ./android/app/build/outputs/apk/release/app-release.apk",
+    "android:bundle": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "build:ios": "react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios'"
   },
   "dependencies": {
@@ -23,6 +27,7 @@
     "react-native": "0.57.8",
     "react-native-app-intro-slider": "^2.0.1",
     "react-native-cached-image": "^1.4.3",
+    "react-native-dialogs": "^1.0.4",
     "react-native-easy-toast": "^1.1.0",
     "react-native-fa-icons": "^4.1.0",
     "react-native-fontawesome": "^6.0.1",
@@ -31,10 +36,12 @@
     "react-native-linear-gradient": "^2.5.3",
     "react-native-modalbox": "^1.7.1",
     "react-native-motion": "^1.0.2",
+    "react-native-progress": "^3.6.0",
     "react-native-slider": "^0.11.0",
     "react-native-smart-splash-screen": "^2.3.5",
     "react-native-snap-carousel": "^3.7.5",
     "react-native-sortable-list": "0.0.23",
+    "react-native-super-grid": "^3.0.4",
     "react-native-svg": "^8.0.10",
     "react-native-swipe-list-view": "^1.5.3",
     "react-native-uuid": "^1.4.9",

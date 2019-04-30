@@ -110,6 +110,8 @@ On Build Configuration, change Debug to Release
 	 place this line:
 	 `multiDexEnabled = true`
 
+2. Deploy to phone
+	adb install -r ./android/app/build/outputs/apk/release/app-release.apk
 
 [Source][1]
 

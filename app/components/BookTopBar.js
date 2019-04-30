@@ -192,7 +192,7 @@ class TopBar extends Component {
           <Icono name="ios-albums" style={{fontSize: 24, color: '#65256f'}} />
         </TouchableOpacity>
         <Text style={styles.current_page}>
-          {this.props.navigation.getParam('Location', '')}
+          {!isNaN(this.props.navigation.getParam('Location', '')) ? this.props.navigation.getParam('Location', '') : ''}
           /{this.props.navigation.getParam('TotalPages', '0')}
         </Text>
         

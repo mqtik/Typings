@@ -104,9 +104,14 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        renderscriptTargetApi rootProject.ext.minSdkVersion
+        renderscriptSupportModeEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
     signingConfigs {
         release {
@@ -147,20 +152,10 @@ android {
         }
     }
 }
-subprojects {
-    afterEvaluate {project ->
-    // force libs to use recent buildtools
-        if (project.hasProperty("android")) {
-            android {
-                compileSdkVersion = rootProject.ext.minSdkVersion  // change to match your desired version
-                buildToolsVersion = rootProject.ext.buildToolsVersion // ....
-            }
-        }
-    }
-}
+
 dependencies {
+    compile project(':react-native-fetch-blob')
     compile project(':react-native-vector-icons')
-    compile project(':rn-fetch-blob')
     compile project(':react-native-svg')
     compile project(':react-native-smart-splash-screen')
     compile project(':react-native-orientation')

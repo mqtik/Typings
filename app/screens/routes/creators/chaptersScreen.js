@@ -72,8 +72,10 @@ export default class ChaptersScreen extends Component<Props>{
                             return item.archive == false
                          }); */
             let chaptersFromBooks = _.filter(books, (item) =>{
+                console.log("chapters items", item, this.state._id)
                             return item.bookId == this.state._id;
                          });
+            console.log("chapers from books!", chaptersFromBooks)
             let chapterFromBooksOrdered = _.orderBy(chaptersFromBooks, ['index'],['asc']);
             
             this.setState({chapters: chapterFromBooksOrdered, countChapters: chapterFromBooksOrdered.length, isLoading: false})
@@ -291,7 +293,7 @@ export default class ChaptersScreen extends Component<Props>{
                       />
                     </View>
                     
-                    <TouchableOpacity style={styles.buttonCreateBook} onPress={this._onEdit}>
+                    <TouchableOpacity style={styles.buttonCreateBook} onPress={this._onCreate}>
                       <Icono name="ios-add-circle-outline" style={styles.pressCreateBook} />
                     </TouchableOpacity>
                      

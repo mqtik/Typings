@@ -10,6 +10,7 @@ target 'Typings' do
   target 'Typings-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
+
   end
 
   target 'TypingsTests' do

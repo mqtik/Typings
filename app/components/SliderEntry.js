@@ -9,6 +9,7 @@ import {
     CachedImage,
     ImageCacheProvider
 } from 'react-native-cached-image';
+import * as Progress from 'react-native-progress';
 
 type Props = { navigation: Function, onDocPress: Function }
 export default class SliderEntry extends Component {
@@ -50,7 +51,8 @@ export default class SliderEntry extends Component {
    }
 
     render () {
-        const { data: { title, description }, even } = this.props;
+        const { data: { title, description, percentage }, even } = this.props;
+        let percentageBook = (percentage * 100).toFixed(0);
         const uppercaseTitle = title ? (
             <Text
               style={styles.title}
@@ -71,10 +73,15 @@ export default class SliderEntry extends Component {
                            
                          { this.image }
                          <View style={styles.radiusMask} />
+                         
                          <LinearGradient
                                     colors={['rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.6)', 'rgb(0, 0, 0)']}
                                     style={styles.contentContainer}
                                   />
+                              {percentageBook != 'NaN' && 
+                                       
+                                          <Progress.Circle style={{position: 'absolute', top: 10, right: 10, flex: 1, justifyContent: 'center', alignItems: 'center'}} color={'#55c583'} progress={percentage} size={50} />
+                              }
                          <View style={styles.textContainer}>
                              
                              

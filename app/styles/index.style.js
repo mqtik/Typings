@@ -1,10 +1,11 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+const IS_IOS = Platform.OS === 'ios';
 
 export const colors = {
     black: '#1a1917',
     gray: '#888888',
     background1: '#1a1917',
-    background2: '#B721FF',
+    background2: '#545351',
     white: '#ffffff'
 };
 
@@ -38,7 +39,7 @@ export default StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.9)',
         fontSize: 20,
         fontWeight: 'bold',
-        textAlign: 'center'
+        textAlign: 'left'
     },
     titleDark: {
         color: colors.black
@@ -50,7 +51,16 @@ export default StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.75)',
         fontSize: 13,
         fontStyle: 'italic',
-        textAlign: 'center'
+        textAlign: 'left'
+    },
+    subtitleDark: {
+        marginTop: 5,
+        paddingHorizontal: 30,
+        backgroundColor: 'transparent',
+        color: 'rgba(0, 0, 0, 0.75)',
+        fontSize: 13,
+        fontStyle: 'italic',
+        textAlign: 'left'
     },
     slider: {
         marginTop: 15,
@@ -73,5 +83,15 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: 80
-    }
+    },
+    modal4: {
+      },
+      modal: {
+        justifyContent: 'center',
+        alignItems: 'center'
+      },
+      searchIconHeader: {
+          color: '#fff', fontSize: 20,
+          marginTop: 10
+      }
 });

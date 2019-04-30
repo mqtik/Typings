@@ -178,8 +178,8 @@ class BottomBar extends Component {
             style={styles.slider}
             disabled={this.props.disabled}
             value={this.props.value}
-            maximumTrackTintColor='transparent'
-            minimumTrackTintColor='#000'
+            maximumTrackTintColor='rgba(0,0,0,.3)'
+            minimumTrackTintColor='#55c583'
             thumbStyle={sliderStyles.thumb}
             trackStyle={sliderStyles.track}
             onSlidingComplete={this.props.onSlidingComplete} />

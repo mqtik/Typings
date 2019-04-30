@@ -42,7 +42,7 @@ export default StyleSheet.create({
       shadowOpacity: 0.8,
       shadowRadius: 2,
      alignItems: 'center',
-     marginTop: 200
+     marginTop: alto  / 2
   },
   readDocIcon: {
       color: 'rgba(255, 255, 255, 0.5)',
@@ -73,9 +73,11 @@ export default StyleSheet.create({
   },
   descriptionContainer: {
     fontSize: 18,
-    margin: 15,
-    marginTop: 35,
-    color: '#666'
+    padding: 15,
+    paddingTop: 20,
+    flex:1,
+    color: 'rgba(255,255,255,.6)',
+    backgroundColor: '#333'
   },
   indicator: {
     flex: 1,
@@ -92,8 +94,8 @@ export default StyleSheet.create({
     borderBottomWidth: 1,
     padding: 20,
     fontSize: 20,
-    color: '#111',
-    backgroundColor: '#f3f3f3',
+    color: '#fff',
+    backgroundColor: '#222',
     borderColor: 'rgba(0,0,0,.2)'
   }
 });

@@ -19,14 +19,14 @@ import {
   SettingsCategoryHeader,
   SettingsSwitch,
   SettingsPicker
-} from "react-native-settings-components";
+} from "../../../libraries/settings";
 
 PouchDB.plugin(APIAuth);
 PouchDB.plugin(APIFind);
 PouchDB.plugin(APIUpsert);
 let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
-let APILocal = PouchDB(LOCAL_DB_NAME);
+let APILocal = PouchDB(LOCAL_DB_NAME, {auto_compaction: true});
 
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
 

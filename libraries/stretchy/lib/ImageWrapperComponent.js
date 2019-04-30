@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+   import React, { Component } from 'react'
 import {
   View,
   Animated,
@@ -8,8 +8,11 @@ import PropTypes from 'prop-types'
 import LinearGradient from 'react-native-linear-gradient'
 
 import Styles from './styles'
-
-const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground)
+import {
+    CachedImage,
+    ImageCacheProvider
+} from 'react-native-cached-image';
+const AnimatedImageBackground = Animated.createAnimatedComponent(CachedImage)
 
 export default class ImageWrapperComponent extends Component {
   constructor (props) {
