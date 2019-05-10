@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, AsyncStorage, Text, TextInput, View, Button, Alert, TouchableOpacity, TouchableHighlight, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, ActivityIndicator, NetInfo, Dimensions } from 'react-native';
+import {Platform, StyleSheet, AsyncStorage, Text, TextInput, View, Button, Alert, TouchableOpacity, TouchableHighlight, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, ActivityIndicator, NetInfo, Dimensions, RefreshControl } from 'react-native';
 import Icon from 'react-native-fa-icons';
 import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
@@ -20,7 +20,8 @@ import { createBottomTabNavigator, createStackNavigator, createAppContainer, Hea
 import { getLang, Languages } from '../../static/languages';
 import * as Progress from 'react-native-progress';
 import SearchScreen from './searchScreen.js';
-
+const IS_IOS = Platform.OS === 'ios';
+const IS_ANDROID = Platform.OS === 'android';
 import {
     CachedImage,
     ImageCacheProvider
@@ -35,7 +36,6 @@ let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME, {auto_compaction: true});
 const SLIDER_1_FIRST_ITEM = 1;
-const IS_ANDROID = Platform.OS === 'android';
 
 String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g, "");
@@ -56,7 +56,7 @@ export default class ExploreScreen extends Component<Props> {
                 style={{position: 'absolute', left: 20, top: 10, flex: 1}}>
                 <Icono name="ios-search" style={styles.searchIconHeader} />
                 <TextInput
-                        style={{marginTop: -33, color: '#fff', marginLeft: 20, fontSize: 16, width: ancho - 70}}
+                        style={{marginTop: IS_ANDROID ? -33 : -20, color: '#fff', marginLeft: 20, fontSize: 16, width: ancho - 70}}
                         onChangeText={(text) => params.handleSearch(text)}
                         placeholder={Languages.onSearch[getLang()]}
                         placeholderTextColor="#999"
@@ -94,7 +94,8 @@ export default class ExploreScreen extends Component<Props> {
             booksOffline: null,
             connection_Status : "online",
             modalVisible: false,
-            smartLoading: true
+            smartLoading: true,
+            refreshing: false
         };
         this._onDocPress = this._onDocPress.bind(this);
         this._renderDocs = this._renderDocs.bind(this);
@@ -108,6 +109,7 @@ export default class ExploreScreen extends Component<Props> {
       this.props.navigation.setParams({ searchCancel: false });
       this._syncDocs();
       this._renderDocs();
+      this.setState({smartLoading: false});
       _this = this;
        NetInfo.isConnected.addEventListener(
             'connectionChange',
@@ -171,7 +173,7 @@ export default class ExploreScreen extends Component<Props> {
 
             this._renderDocs();
           }).catch(err => {
-            console.log(err);
+            //console.log(err);
           
           });
           
@@ -182,7 +184,7 @@ export default class ExploreScreen extends Component<Props> {
 
     _onSearch = (text) => {
       // event to open search
-      console.log("ON SEARCH!", text);
+      //console.log("ON SEARCH!", text);
       this.setState({ textShearch: text });
     }
     _openSearch = () => {
@@ -200,6 +202,10 @@ export default class ExploreScreen extends Component<Props> {
     }
     _onOpenSearch = () => {
       this.props.navigation.setParams({ searchCancel: true});
+    }
+    _onRefresh = () => {
+      this.setState({refreshing: true});
+      this._renderDocs();
     }
     _renderDocs = event => {
 
@@ -229,12 +235,12 @@ export default class ExploreScreen extends Component<Props> {
                             }
                             return map;
                           }, Object.create(null));
-            this.setState({ docs: doks, offlineBooks: booksOffline, smartLoad: counts, smartLoadCounts: _.keys(counts).length, isLoading: false})
+            this.setState({ docs: doks, offlineBooks: booksOffline, smartLoad: counts, smartLoadCounts: _.keys(counts).length, isLoading: false, refreshing: false})
             
 
           
           }).catch(err => {
-            console.log(err);
+            //console.log(err);
               return null;
           });
         /*APIBooks.createIndex({
@@ -272,12 +278,13 @@ export default class ExploreScreen extends Component<Props> {
     _onDocPress  = () => {
       this.props.navigation.navigate('Settings');
     }
-    _renderItem = ({item, index}) => {
+
+
+    _renderPerBook = (item, index) => {
         return (
-            <SliderEntry data={item} even={(index + 1) % 2 === 0}  navigation={this.props.navigation} />
+            <SliderEntry key={index} data={item} even={(index + 1) % 2 === 0} navigation={this.props.navigation} />
             );
     }
-
 
     _renderItemWithParallax = ({item, index}, parallaxProps) => {
         return (
@@ -288,18 +295,6 @@ export default class ExploreScreen extends Component<Props> {
               navigation={this.props.navigation}
             />
         );
-    }
-
-    _renderLightItem = ({item, index}) => {
-        return (
-            <SliderEntry data={item} even={false} navigation={this.props.navigation} />
-            );
-    }
-
-    _renderDarkItem = ({item, index}) =>  {
-        return  (
-            <SliderEntry data={item} even={true} navigation={this.props.navigation}/>
-            );
     }
 
     mainExample (books, number, title) {
@@ -313,7 +308,7 @@ export default class ExploreScreen extends Component<Props> {
             <View style={[styles.exampleContainer, isEven ? styles.exampleContainerDark : styles.exampleContainerLight]} key={title}>
                 <Text style={[styles.title, isEven ? {} : styles.titleDark]}>{`${title}`}</Text>
                 <Text style={[styles.subtitle, isEven ? {} : styles.subtitleDark]}>{books.length} {Languages.booksFound[getLang()]}</Text>
-                <Carousel
+                 {/*<Carousel
                   ref={c => this._slider1Ref = c}
                   data={books}
                   renderItem={this._renderItemWithParallax}
@@ -323,14 +318,25 @@ export default class ExploreScreen extends Component<Props> {
                   firstItem={SLIDER_1_FIRST_ITEM}
                   inactiveSlideScale={1}
                   inactiveSlideOpacity={0.7}
-                  useScrollView={true}
                   // inactiveSlideShift={20}
                   containerCustomStyle={styles.slider}
                   contentContainerCustomStyle={styles.sliderContentContainer}
                   loop={true}
                   autoplay={false}
                   onSnapToItem={(index) => this.setState({ slider1ActiveSlide: index }) }
-                />
+                />*/}
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollViewBooks}>
+                    {books.map((key, i) => {
+                          for(let k in key){
+                            //console.log("Books map", key, i)
+                            return (
+                              this._renderPerBook(key, i)
+                              )
+                          }
+                        })}
+                </ScrollView>
+              
                 {/*<Pagination
                   dotsLength={this.state.docs.length}
                   activeDotIndex={slider1ActiveSlide}
@@ -348,84 +354,6 @@ export default class ExploreScreen extends Component<Props> {
       }
     }
 
-    momentumExample (number, title) {
-        if(this.state.fiction && this.state.fiction.length){
-        return (
-
-            <View style={styles.exampleContainer}>
-                <Text style={styles.title}>{`Gratuitos - ${number}`}</Text>
-                <Text style={styles.subtitle}>{title}</Text>
-                <Carousel
-                  data={this.state.fiction}
-                  renderItem={this._renderItem}
-                  sliderWidth={sliderWidth}
-                  itemWidth={itemWidth}
-                  inactiveSlideScale={0.95}
-                  inactiveSlideOpacity={1}
-                  enableMomentum={true}
-                  activeSlideAlignment={'start'}
-                  containerCustomStyle={styles.slider}
-                  contentContainerCustomStyle={styles.sliderContentContainer}
-                  activeAnimationType={'spring'}
-                  activeAnimationOptions={{
-                      friction: 4,
-                      tension: 40
-                  }}
-                />
-            </View>
-        );
-    }
-    }
-
-    layoutExample (number, title, type) {
-        if(this.state.fiction && this.state.fiction.length){
-        const isTinder = type === 'tinder';
-        return (
-            <View style={[styles.exampleContainer, isTinder ? styles.exampleContainerDark : styles.exampleContainerLight]}>
-                <Text style={[styles.title, isTinder ? {} : styles.titleDark]}>{`Recomendados ${number}`}</Text>
-                <Text style={[styles.subtitle, isTinder ? {} : styles.titleDark]}>{title}</Text>
-                <Carousel
-                  data={isTinder ? this.state.fiction : this.state.fiction}
-                  renderItem={isTinder ? this._renderLightItem : this._renderItem}
-                  sliderWidth={sliderWidth}
-                  itemWidth={itemWidth}
-                  containerCustomStyle={styles.slider}
-                  contentContainerCustomStyle={styles.sliderContentContainer}
-                  layout={type}
-                  loop={true}
-                />
-            </View>
-        );
-        }
-    }
-
-    customExample (number, title, refNumber, renderItemFunc) {
-        if(this.state.docs && this.state.docs.length){
-        const isEven = refNumber % 2 === 0;
-
-        // Do not render examples on Android; because of the zIndex bug, they won't work as is
-        return !IS_ANDROID ? (
-            <View style={[styles.exampleContainer, isEven ? styles.exampleContainerDark : styles.exampleContainerLight]}>
-                <Text style={[styles.title, isEven ? {} : styles.titleDark]}>{`${title}`}</Text>
-                
-                <Carousel
-                  data={isEven ? this.state.docs : this.state.docs}
-                  renderItem={renderItemFunc}
-                  sliderWidth={sliderWidth}
-                  itemWidth={itemWidth}
-                  containerCustomStyle={styles.slider}
-                  contentContainerCustomStyle={styles.sliderContentContainer}
-                  scrollInterpolator={scrollInterpolators[`scrollInterpolator${refNumber}`]}
-                  slideInterpolatedStyle={animatedStyles[`animatedStyles${refNumber}`]}
-                  useScrollView={true}
-                />
-            </View>
-        ) : false;
-    }
-    }
-
-    
-
     get gradient () {
         return (
             <LinearGradient
@@ -438,7 +366,9 @@ export default class ExploreScreen extends Component<Props> {
     }
     _renderOffline = () => {
       if(this.state.offlineBooks != null){
-        this.setState({smartLoading: false});
+        if(this.state.smartLoading == true) {
+                            this.setState({smartLoading: false});
+                          }
         return this.mainExample(this.state.offlineBooks, '1', 'Offline');
       }
 
@@ -472,7 +402,10 @@ export default class ExploreScreen extends Component<Props> {
                             this.mainExample(key[k], i, k)
                             )
                           }
-                          this.setState({smartLoading: false});
+                          if(this.state.smartLoading == true) {
+                            this.setState({smartLoading: false});
+                          }
+                          
                         })}
 
 
@@ -516,6 +449,12 @@ export default class ExploreScreen extends Component<Props> {
                       style={styles.scrollview}
                       scrollEventThrottle={200}
                       directionalLockEnabled={true}
+                      refreshControl={
+                          <RefreshControl
+                            refreshing={this.state.refreshing}
+                            onRefresh={this._onRefresh}
+                          />
+                        }
                     >
                       {this.state.smartLoading === true && 
                       <Progress.Circle

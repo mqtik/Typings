@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Dimensions, TouchableHighlight, Animated, Easing } from 'react-native';
+import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Dimensions, TouchableHighlight, Animated, Easing, RefreshControl } from 'react-native';
 import Icon from 'react-native-fa-icons';
 import Icono from 'react-native-vector-icons/Ionicons';
 import EntypoIcono from 'react-native-vector-icons/Entypo';
@@ -32,6 +32,13 @@ var ancho = Dimensions.get('window').width; //full width
 var alto = Dimensions.get('window').height; //full height
 
 export default class ChaptersScreen extends Component<Props>{
+  static navigationOptions = ({ navigation }) => {
+          const { params = {} } = navigation.state;
+        return {
+          headerBackTitle: null
+          //Text color of ActionBar
+        };
+      };
     constructor (props) {
         super(props);
         let doc = this.props.navigation.getParam('dataBook', false);
@@ -47,49 +54,43 @@ export default class ChaptersScreen extends Component<Props>{
             countChapters: 0,
             color: 'red',
             swipeToClose: true,
-            isOpen: false
+            isOpen: false,
+            refreshing: false
         };
         
     }
     componentDidMount() {
         this._renderAllChapter();
     }
+    _onRefresh = () => {
+        this.setState({refreshing: true});
+        this._renderAllChapter();
+      }
     _renderAllChapter = () => {
         APILocalDrafts.get(this.state._id).then(doc => {
-            console.log("Component did mount")
-            console.log("ChapterScreen Props", this.props)
             APILocalChapters.allDocs({
             include_docs: true,
             attachments: true
           }).then(result => {
-            console.log("Get all chapters")
-            console.log(result);
-            console.log("States", this.state._id)
             let books = result.rows.map(function (row) { return row.doc; });  
-
-            console.log("Parse all chapters", books)
-            /*let booksNow = _.filter(books, function(item){
-                            return item.archive == false
-                         }); */
             let chaptersFromBooks = _.filter(books, (item) =>{
-                console.log("chapters items", item, this.state._id)
                             return item.bookId == this.state._id;
                          });
-            console.log("chapers from books!", chaptersFromBooks)
             let chapterFromBooksOrdered = _.orderBy(chaptersFromBooks, ['index'],['asc']);
             
-            this.setState({chapters: chapterFromBooksOrdered, countChapters: chapterFromBooksOrdered.length, isLoading: false})
-            console.log("counter!", chapterFromBooksOrdered.length, this.state.countChapters)
+            this.setState({chapters: chapterFromBooksOrdered, countChapters: chapterFromBooksOrdered.length, isLoading: false, refreshing: false})
+            
           }).catch(err => {    
-            console.log(err);
+            //console.log(err);
           
           });
-          console.log(doc);
+          
           
         });
     }
     _onCreate = () => {
-        console.log("On create", this.state.countChapters)
+
+       
             let bookId = uuid.v1();
             APILocalChapters.upsert(bookId, doc => {
                       doc.title = this.state.title_chapter;
@@ -101,24 +102,22 @@ export default class ChaptersScreen extends Component<Props>{
 
                       APILocalChapters.get(bookId)
                         .then(resp => {
-                          console.log("New book", resp);
-
+                          
                          this.setState({title_chapter: null, countChapters: this.state.countChapters + 1, chapters: this.state.chapters.concat([resp])})
                         })
                         .catch(err => {
-                          console.log("Error getting the new book", err)
+                         // console.log("Error getting the new book", err)
                         })
 
 
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("Error creating book", error)
+                      //console.log("Error creating book", error)
                       // error
                     });
     }    
 
      _onDelete = (book) => {
-      console.log("Book to delete:", book)
           Alert.alert(
             'Are you sure you want to delete this chapter?',
             'You won\' be able to recover it',
@@ -127,9 +126,6 @@ export default class ChaptersScreen extends Component<Props>{
                 text: 'Delete', 
                   onPress: () => {
                     APILocalChapters.get(book._id).then((doc) => {
-                      console.log("doc!", doc)
-                      
-                        console.log("deleting")
                         let newData = [...this.state.chapters];
                         let prevIndex = this.state.chapters.findIndex(item => item._id === book._id);
                         newData.splice(prevIndex, 1);
@@ -151,21 +147,18 @@ export default class ChaptersScreen extends Component<Props>{
   }
 
   _onMove = (chapters) => {
-      console.log("on Move", chapters)
       let index = 0
       for(let index = 0; chapters.length > index; index++){
-          console.log("Chapters Index", chapters[index])
-          console.log("Index Chapter", index, chapters[index], this.state.chapters[chapters[index]].index, this.state.chapters[chapters[index]].title)
-  
+        
           APILocalChapters.upsert(this.state.chapters[chapters[index]]._id, doc => {
                       doc.index = index;
                       return doc;
                     }).then((res) => {
 
-                      console.log("Chapters changed!", res)
+                   //   console.log("Chapters changed!", res)
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("Error creating book", error)
+                    //  console.log("Error creating book", error)
                       // error
                     });
       }
@@ -190,8 +183,7 @@ export default class ChaptersScreen extends Component<Props>{
 
   _checkIfNone = () => {
 
-    console.log("check if none chapters", this.state.chapters.length)
-
+   
     if(this.state.chapters.length == 0){
       return (
         <View style={{alignItems: 'center',justifyContent: 'center', flex: 1, marginTop: 100}}>
@@ -206,9 +198,7 @@ export default class ChaptersScreen extends Component<Props>{
   }
 
   _onOpenModal = () => {
-      console.log("Open!")
-      console.log("Open modal!", this.props.navigation.state.params);
-      
+     
       this.setState({isOpen: true});
 
   }
@@ -228,7 +218,6 @@ export default class ChaptersScreen extends Component<Props>{
           />
         )
     } else {
-        console.log("Chapters Render", this.state.chapters)
         return(
            <View style={{flex: 1}}>
               
@@ -243,19 +232,26 @@ export default class ChaptersScreen extends Component<Props>{
                         </Text>
 
                 </View>
-                <View style={styles.container}>
+                <ScrollView 
+                  style={styles.container} 
+                  refreshControl={
+                      <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                      />
+                }>
                      {this._checkIfNone()}
-           <SortableList
-              style={{flex: 1}}
-              //contentContainerStyle={styles.contentContainer}
-              data={this.state.chapters}
-              renderRow={this._onRenderRow}
-              onChangeOrder={(nextOrder) => { this._onMove(nextOrder) }}
-              onReleaseRow={(key) => { console.log("On Release Row", key) }} 
-              
-           />
+                     <SortableList
+                        style={{flex: 1}}
+                        //contentContainerStyle={styles.contentContainer}
+                        data={this.state.chapters}
+                        renderRow={this._onRenderRow}
+                        onChangeOrder={(nextOrder) => { this._onMove(nextOrder) }}
+                        onReleaseRow={(key) => { console.log("On Release Row", key) }} 
+                        
+                     />
                
-           </View>
+               </ScrollView>
             
             <LinearGradient
                       colors={['transparent', 'transparent', '#333','#222','#111']}
@@ -276,6 +272,7 @@ export default class ChaptersScreen extends Component<Props>{
                       // start={{ x: 0, y: 0 }}
                       // end={{ x: 1, y: 1 }}
                     >
+             {/* Create book view */}
              <View style={{alignSelf:'flex-end', width: ancho, justifyContent: 'center', alignItems: 'center'}}>
                
 
@@ -342,7 +339,6 @@ class Row extends Component {
 
   constructor(props) {
     super(props);
-    console.log("this props Row Chapters", this.props)
     this._active = new Animated.Value(0);
     const {data, active} = this.props;
     this.state = {
@@ -390,14 +386,12 @@ class Row extends Component {
   }
 
   _onEditTitleChapter = (id, title) => {
-      console.log("Title id", id, title)
       this.setState({title: title})
       APILocalChapters.upsert(id, doc => {
                       doc.title = title;
                       return doc;
                     }).then((res) => {
                         
-                        console.log("Changed!", res) 
 
                         this.setState({color: '#36ca41'});
                         this.refs.toast.show('The title has been changed', 2000);
@@ -405,13 +399,12 @@ class Row extends Component {
                     }).catch((error) => {
                         this.setState({color: 'red'});
                         this.refs.toast.show('Something went wrong', 2000);
-                      console.log("Error creating book", error)
+                      //console.log("Error creating book", error)
                       // error
                     });
   }
 
   _onPress = (book) => {
-      console.log("Book", book)
     this.props.navigation.navigate('ChapterDetails',{
                                         dataChapter: book,
                                         onEditTitle: (id, title) => this._onEditTitleChapter(id, title)
@@ -534,6 +527,7 @@ class Row extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 10
   },
   standalone: {
     margin: 10,

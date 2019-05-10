@@ -16,7 +16,7 @@ import PouchDB from 'pouchdb-react-native'
 import APIAuth from 'pouchdb-authentication'
 import APIFind from 'pouchdb-find'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import { API_URL, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC, SETTINGS_LOCAL_DB_NAME } from 'react-native-dotenv'
+import { API_URL, LOCAL_DB_DRAFTS, LOCAL_DB_CHAPTERS, PORT_API_DIRECT, PORT_API, DB_BOOKS, INDEX_NAME, LOCAL_DB_NAME, API_STATIC, SETTINGS_LOCAL_DB_NAME } from 'react-native-dotenv'
 import LinearGradient from 'react-native-linear-gradient';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
@@ -46,9 +46,10 @@ let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME);
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
+let APILocalDrafts = PouchDB(LOCAL_DB_DRAFTS);
+let APILocalChapters = PouchDB(LOCAL_DB_CHAPTERS);
 
 const IS_ANDROID = Platform.OS === 'android';
-console.log("path", API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS)
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -74,30 +75,30 @@ type Props = { navigation: Function }
 export default class SignedIn extends React.Component {
   constructor(props) {
       super(props);
-      console.log("this props signed IN!", this.props);
-      console.log("Get language!", getLang())
-      console.log("Languages started!", Languages.bottomBarCreators[getLang()])
    }
 
     _onLogout = () => {
-      console.log("Siging out", this.props)
           API.logOut((err, response) => {
         if (err) {
           // network error
-          console.log("on error", err)
+          //console.log("on error", err)
           return null;
         }
         
-        console.log("signedIn onLogout: ", response)
+
           APILocal.destroy().then(res => {
             APILocalSettings.destroy().then(resp => {
                 APILocal = PouchDB(LOCAL_DB_NAME);
                 APILocalSettings = new PouchDB(SETTINGS_LOCAL_DB_NAME);
+                APILocalChapters.destroy();
+                APILocalDrafts.destroy();
+                this.props.navigation.navigate('SignedOut');
                 const resetAction = StackActions.reset({
                                       index: 0,
                                       actions: [NavigationActions.navigate({ routeName: 'SignedOut' })]
                                   });
                 this.props.navigation.dispatch(resetAction);
+                
             });
           });
           

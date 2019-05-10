@@ -92,6 +92,9 @@ export default StyleSheet.create({
       },
       searchIconHeader: {
           color: '#fff', fontSize: 20,
-          marginTop: 10
+          marginTop: IS_IOS ? 2 : 10
+      },
+      scrollViewBooks: {
+          marginTop: 23
       }
 });

@@ -21,7 +21,7 @@ var ancho = Dimensions.get('window').width; //full width
 var alto = Dimensions.get('window').height; //full height
 export default class DocScreen extends Component<Props>{
     static navigationOptions = ({ navigation }) => {
-          console.log("navigation options!")
+          
           const { params = {} } = navigation.state;
         return {
           //Default Title of ActionBar
@@ -34,7 +34,7 @@ export default class DocScreen extends Component<Props>{
         super(props);
         let doc = this.props.navigation.getParam('dataDoc', false);
 
-        console.log("Doc data!", doc)
+        //console.log("Doc data!", doc)
         this.state = {
             title: doc.data.title || null,
             author: doc.data.author || null,
@@ -47,21 +47,21 @@ export default class DocScreen extends Component<Props>{
     }
     componentDidMount() {
         APILocal.get(this.state._id).then(doc => {
-            console.log("Component did mount")
+            //console.log("Component did mount")
           console.log(doc);
           this.setState({ isLoading: false, docBook: doc })
         });
     }
     onReadPress = () => {
         let doc = this.props.navigation.getParam('dataDoc', false);
-        console.log("doc", doc)
+        //console.log("doc", doc)
         this.props.navigation.navigate('Reader',{
                                         dataDoc: doc
                                       });
    }
    _openButton = () => {
        let percentage = (this.state.docBook.percentage * 100).toFixed(0);
-       console.log("this percentage", percentage)
+       //console.log("this percentage", percentage)
        return (
 
            <View style={{flex: 1, alignItems: 'center'}}>
@@ -94,7 +94,7 @@ export default class DocScreen extends Component<Props>{
           />
         )
     } else {
-        console.log("this state author", this.state.author)
+        //console.log("this state author", this.state.author)
         
 
         return(

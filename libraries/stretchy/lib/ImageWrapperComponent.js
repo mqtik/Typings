@@ -12,7 +12,7 @@ import {
     CachedImage,
     ImageCacheProvider
 } from 'react-native-cached-image';
-const AnimatedImageBackground = Animated.createAnimatedComponent(CachedImage)
+const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground)
 
 export default class ImageWrapperComponent extends Component {
   constructor (props) {

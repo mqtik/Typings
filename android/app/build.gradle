@@ -132,6 +132,10 @@ android {
         }
     }
     buildTypes {
+         lintOptions {
+                checkReleaseBuilds false
+                abortOnError false
+            }
         release {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
@@ -155,6 +159,9 @@ android {
 
 dependencies {
     compile project(':react-native-fetch-blob')
+    compile project(':react-native-webview')
+    compile project(':rn-fetch-blob')
+    compile project(':react-native-dialogs')
     compile project(':react-native-vector-icons')
     compile project(':react-native-svg')
     compile project(':react-native-smart-splash-screen')

@@ -15,6 +15,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.12",
     "@fortawesome/free-solid-svg-icons": "^5.6.3",
     "@fortawesome/react-native-fontawesome": "^0.1.0",
+    "babel-polyfill": "^6.26.0",
     "epubjs-rn": "0.0.127",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
@@ -27,6 +28,7 @@
     "react-native": "0.57.8",
     "react-native-app-intro-slider": "^2.0.1",
     "react-native-cached-image": "^1.4.3",
+    "react-native-cn-richtext-editor": "^1.0.35",
     "react-native-dialogs": "^1.0.4",
     "react-native-easy-toast": "^1.1.0",
     "react-native-fa-icons": "^4.1.0",
@@ -46,7 +48,7 @@
     "react-native-swipe-list-view": "^1.5.3",
     "react-native-uuid": "^1.4.9",
     "react-native-vector-icons": "^6.4.2",
-    "react-native-wkwebview-reborn": "^2.0.0",
+    "react-native-webview": "^5.8.1",
     "react-navigation": "^3.0.9",
     "react-navigation-transitions": "^1.0.10",
     "rn-fetch-blob": "^0.10.15",
@@ -55,6 +57,7 @@
     "xmldom-alpha": "git+https://github.com/valinaga/xmldom.git"
   },
   "devDependencies": {
+    "@babel/plugin-transform-object-assign": "^7.2.0",
     "babel-jest": "23.6.0",
     "jest": "23.6.0",
     "metro-react-native-babel-preset": "0.51.1",

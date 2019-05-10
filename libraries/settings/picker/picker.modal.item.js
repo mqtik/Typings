@@ -65,7 +65,7 @@ class PickerModalItem extends Component {
         >
           <View style={style.itemWrapper}>
             <View style={style.indicatorWrapper}>
-              <View style={[style.indicator, { backgroundColor: selected ? '#e89ee5' : null }]} />
+              <View style={[style.indicator, { backgroundColor: '#e89ee5'  }]} />
             </View>
             <View style={style.labelWrapper}>
               <Text style={style.label}>

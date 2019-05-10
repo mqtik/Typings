@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView,
+import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, Dimensions, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView,
   AppRegistry,
   Animated,
   Modal } from 'react-native';
@@ -20,6 +20,9 @@ let API = PouchDB(API_URL+':'+PORT_API_DIRECT, {skip_setup: true});
 let APIBooks = PouchDB(API_URL+':'+PORT_API_DIRECT+'/'+DB_BOOKS, {skip_setup: true});
 let APILocal = PouchDB(LOCAL_DB_NAME, {auto_compaction: true});
 let APILocalSettings = PouchDB(SETTINGS_LOCAL_DB_NAME);
+var ancho = Dimensions.get('window').width; //full width
+var alto = Dimensions.get('window').height; //full height
+
 export default class ReaderScreen extends Component<Props>{
       static navigationOptions = ({ navigation }) => {
           console.log("navigation options!")
@@ -44,10 +47,7 @@ export default class ReaderScreen extends Component<Props>{
 
         
         let doc = this.props.navigation.getParam('dataDoc', false);
-        console.log("Starting!", API_STATIC+"/epub/"+doc.data.path)
-        console.log("    Title!", this.props.navigation.getParam('dataDoc', false).data.title)
-
-        console.log("last page was", doc.data.last_cfi)
+        
         this.state = {
             title: doc.data.title,
             author: doc.data.author,
@@ -55,7 +55,7 @@ export default class ReaderScreen extends Component<Props>{
             cover: doc.data.cover,
             path: doc.data.path,
             _id: doc.data._id,
-            isLoading: true,
+            isLoading: false,
             flow: "paginated", // paginated || scrolled-continuous
             location: doc.data.last_cfi || 0,
             url: API_STATIC+"/epub/"+doc.data.path,
@@ -82,35 +82,37 @@ export default class ReaderScreen extends Component<Props>{
     componentDidMount() {
         APILocalSettings.get('UserSettings')
                   .then(resp => {
-                    console.log("Settings of user!", resp);
                     if(resp.enable_pagination == false){
                         this.setState({flow: "scrolled-continuous"});
+                      } else {
+                        this.setState({flow: "paginated"});
                       }
                   })
                   .catch(err => {
-                    console.log("There's no user logged in!", err)
+                    //console.log("There's no user logged in!", err)
                   })
         APILocal.get(this.state._id).then(doc => {
-            console.log("Component did mount")
-          console.log(doc);
           this.setState({ isLoading: false, location: doc.last_cfi || 0 })
         });
 
             this.streamer.start()
               .then((origin) => {
+                console.log("streaming!", origin)
                 this.setState({origin})
                 return this.streamer.get(this.state.url);
               })
               .then((src) => {
+                console.log("streaming src!", src)
                 return this.setState({src});
+              }).catch((err) => {
+                console.log("error streaming!", err)
+                //console.log("There was an error with the book!", err)
               });
 
             setTimeout(() => this.toggleBars(), 1000);
           }
 
     componentWillUnmount() {
-      console.log("THIS KILL!", this.state.location)
-      console.log("Kill it all", this.state)
       APILocal.upsert(this.state._id, doc => {
                       
                         doc.percentage = this.state.visibleLocation.start.percentage;
@@ -119,7 +121,7 @@ export default class ReaderScreen extends Component<Props>{
                         doc.offline = true;
                       return doc;
                     }).then((res) => {
-                      console.log("onLocationsReady", res)
+                      //console.log("onLocationsReady", res)
                     }).catch((err) => {
 
                     });
@@ -133,7 +135,6 @@ export default class ReaderScreen extends Component<Props>{
 
     render(){
         const {data, isLoading} = this.state;
-      console.log("this props render profile!", this.props.navigation.getParam('dataDoc', false))
         return(
 
               <View style={styles.container}>
@@ -145,6 +146,8 @@ export default class ReaderScreen extends Component<Props>{
               flow={this.state.flow}
               location={this.state.location}
               fontSize={this.state.fontSize}
+              //width={ancho}
+              //height={alto}
               onLocationChange={(visibleLocation)=> {
                 console.log("locationChanged", visibleLocation)
                 this.setState({visibleLocation});
@@ -247,7 +250,7 @@ export default class ReaderScreen extends Component<Props>{
                 shown={this.state.showBars}
                 onSlidingComplete={
                   (value) => {
-                    console.log("Spinner!", value.toFixed(6))
+                    //console.log("Spinner!", value.toFixed(6))
                     this.setState({location: value.toFixed(6)})
                   }
                 }/>

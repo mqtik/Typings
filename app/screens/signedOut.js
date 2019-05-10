@@ -90,14 +90,7 @@ export default class SignedOut extends Component<Props> {
         // After having done stuff (such as async tasks) hide the splash screen
         
         let Go = this.props.navigation;
-        
-        APILocalSettings.get('UserSettings')
-        .then(res => {
-          console.log("User settings!!", res);
-        })
-        .catch(err => {
-          console.log("There's no user logged in!", err)
-        })
+
             API.getSession((err, response) => {
               console.log("Getting session", response)
                 if (err) {
@@ -107,9 +100,7 @@ export default class SignedOut extends Component<Props> {
                 } else {
                   API.getUser(response.userCtx.name).then(res => {
 
-                    console.log("Get user from API", res)
-                    APILocalSettings.upsert('UserSettings', doc => {
-                     console.log("User settings logged", res.nombre, doc)
+                     APILocalSettings.upsert('UserSettings', doc => {
                       
                         doc.logged_in = true;
                         doc.username = res.name;
@@ -120,23 +111,23 @@ export default class SignedOut extends Component<Props> {
                       
                       return doc;
                     }).then((res) => {
-                      console.log("User settings saved!", res)
+                    //  console.log("User settings saved!", res)
                       APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
                       //Go.navigate("SignedIn");
                       this.onContinueAs();
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("User settings error on saving", error)
+                     // console.log("User settings error on saving", error)
                       // error
                     });
 
-                  }).catch(err => { console.log("Something went wrong getting the user")})
-                  console.log("Get user session", response)
+                  }).catch(err => { //console.log("Something went wrong getting the user")})
+                 // console.log("Get user session", response)
                   // response.userCtx.name is the current user
-                   
+                     });
                 }
            this.setState({ isLoading: false })
-          console.log(response,err)
+          
         });
     }
             
@@ -174,9 +165,7 @@ export default class SignedOut extends Component<Props> {
   );
    _onPress = () => {
      
-       console.log("Username", this.state.username)
       if(this.state.username == null && this.state.auth != null && this.state.auth != ""){
-        console.log("this go", this.state.auth)
          /*fetch('URL_GOES_HERE', { 
            method: 'post', 
            headers: new Headers({
@@ -192,7 +181,6 @@ export default class SignedOut extends Component<Props> {
          
           fetch(API_URL+':'+PORT_API+'/users/'+this.state.auth.toLowerCase()+'/boolean')
         .then((response) => {
-          console.log("Resp user", response)
           if(response._bodyInit == "true"){
               this.setState({color: '#36ca41'});
               this.refs.toast.show('The username exist. \n If it\'s yours, type your password', 2000);
@@ -208,30 +196,23 @@ export default class SignedOut extends Component<Props> {
         this.setState(
               {auth: "", placeholder: Languages.Password[getLang()], showPassword: true}, 
               function () {
-                console.log("Updated!", this.state.username)
               }
           )
 
         })
         .catch((err) => {
-            console.log("Err", err)
+           // console.log("Err", err)
         })
 
          } else { 
            if(this.state.username != null){
-             console.log("password!", this.state.exist)
              if(this.state.exist == true){
-               console.log("Logging in");
                API.logIn(this.state.username, this.state.auth).then(res => {
-                  console.log("Logged in!", res);
                   this.setState({color: '#36ca41'});
                   this.refs.toast.show('Bienvenido, '+ this.state.username, 2000);
                    //this.props.navigation.navigate("SignedIn")
                    API.getUser(this.state.username).then(res => {
-                    console.log("Get user from API", res)
                       APILocalSettings.upsert('UserSettings', doc => {
-                       console.log("User settings logged", res.nombre, doc)
-                        
                           doc.logged_in = true;
                           doc.username = res.name;
                           doc.nombre = res.nombre;
@@ -240,17 +221,16 @@ export default class SignedOut extends Component<Props> {
                         
                         return doc;
                       }).then((res) => {
-                        console.log("User settings saved!", res)
                         APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
                         //Go.navigate("SignedIn");
                           this.onContinueAs();
                         // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                       }).catch((error) => {
-                        console.log("User settings error on saving", error)
+                        //console.log("User settings error on saving", error)
                         // error
                       });
                     }).catch((error) => {
-                      console.log("User getting user on login", error)
+                      //console.log("User getting user on login", error)
                       // error
                     });
                   /*return API.logOut();*/
@@ -258,10 +238,9 @@ export default class SignedOut extends Component<Props> {
                   this.setState({color: 'red'});
                     this.refs.toast.show("Error de inicio de sesión", 2000);
       
-                  console.log("Hubo un error de login")
+                  //console.log("Hubo un error de login")
                 });
              } else {
-               console.log("Siging myself up", this.state.username, this.state.auth);
                API.signUp(this.state.username, this.state.auth, {
                   metadata : {
                       email : 'somethingkeetup',
@@ -270,9 +249,7 @@ export default class SignedOut extends Component<Props> {
                     }
                }).then(res => {
                  API.getUser(this.state.username).then(res => {
-                    console.log("Get user from API", res)
                       APILocalSettings.upsert('UserSettings', doc => {
-                       console.log("User settings logged", res.nombre, doc)
                         
                           doc.logged_in = true;
                           doc.username = res.name;
@@ -282,20 +259,18 @@ export default class SignedOut extends Component<Props> {
                         
                         return doc;
                       }).then((res) => {
-                        console.log("User settings saved!", res)
                         APILocalSettings.get('UserSettings').then(doc => {console.log("Get doc!", doc)})
                         //Go.navigate("SignedIn");
                         this.onContinueAs();
                         // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                       }).catch((error) => {
-                        console.log("User settings error on saving", error)
+                       // console.log("User settings error on saving", error)
                         // error
                       });
                     }).catch((error) => {
-                      console.log("User getting user on login", error)
+                     // console.log("User getting user on login", error)
                       // error
                     });
-                  console.log("Registered!", res);
                   this.setState({color: '#36ca41'});
                   this.refs.toast.show('Te has registrado con éxito. \n Bienvenido, '+ this.state.username, 2000);
                  
@@ -303,7 +278,7 @@ export default class SignedOut extends Component<Props> {
                 }).catch(err => {
                   this.setState({color: 'red'});
                     this.refs.toast.show("Error de registro", 2000);
-                  console.log("Hubo un error de signup")
+                //  console.log("Hubo un error de signup")
                 });
              }
            } else {
@@ -319,15 +294,13 @@ export default class SignedOut extends Component<Props> {
 
    }
     _onGoBackAuth = () => {
-      console.log("Go back!")
-
+    
         this.state.username = this.state.auth;
         this.state.auth = null;
         this.state.placeholder = 'User';
 
         this.setState({auth: "", placeholder: "Username", showPassword: false, username: null});
-        console.log(this.state.placeholder)
-
+     
    }
 
       /*<Text style={styles.instructions}>To get started, edit App.js</Text>*/

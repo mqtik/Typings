@@ -38,7 +38,7 @@ export default class SliderEntry extends Component {
               {...parallaxProps}
             />
         ) : (
-            <CachedImage style={styles.image} source={{uri: API_STATIC+'/covers/'+cover}}/>
+            <Image style={styles.image} source={{uri: API_STATIC+'/covers/'+cover}}/>
         );
     }
 

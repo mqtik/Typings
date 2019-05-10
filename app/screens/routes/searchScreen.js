@@ -63,21 +63,13 @@ export default class SearchScreen extends Component<Props>{
         }
 
 
-    onReadPress = () => {
-        let doc = this.props.navigation.getParam('dataDoc', false);
-        console.log("doc", doc)
-        this.props.navigation.navigate('Reader',{
-                                        dataDoc: doc
-                                      });
-   }
-
-   searchBooksSpecificProperties = (properties, companies, filter) => {
+   searchBooksSpecificProperties = (properties, books, filter) => {
       var searchSpecificProperties = _.isArray(properties);
       var result;
         if (typeof filter=== "undefined" ||  filter.length==0) {
-            result = companies;
+            result = books;
         } else {
-          result = _.filter(companies, function (c) {
+          result = _.filter(books, function (c) {
             var cProperties = searchSpecificProperties ? properties : _.keys(c);
             return _.find(cProperties, function(property) {
               if (c[property]) {
@@ -95,10 +87,11 @@ export default class SearchScreen extends Component<Props>{
        }
      }
      _searchByTag = (tag) => {
+
          this.props.navigation.setParams({ SearchInput: tag });
          let searched = this.searchBooksSpecificProperties(['tags'], this.state.allBooks, tag);
          this.setState({ searched: searched})
-
+         this.refs.searchScrollView.scrollTo({x: 0, y: 0, animated: true});
      }
      _goBook = (doc) => {
        let data = [];
@@ -140,14 +133,14 @@ export default class SearchScreen extends Component<Props>{
                       <View style={styles.shadow} />
                        <View style={styles.imageContainer}>
                            
-                         <CachedImage style={styles.image} source={{uri: API_STATIC+'/covers/'+item.cover}}/>
+                         <Image style={styles.image} source={{uri: API_STATIC+'/covers/'+item.cover}}/>
                          <View style={styles.radiusMask} />
                          <LinearGradient
                                     colors={['rgba(0, 0, 0, 0.1)', 'rgba(0, 0, 0, 0.6)', 'rgb(0, 0, 0)']}
                                     style={styles.contentContainer}
                                   />
                                  
-                                  {item.percentage != 'NaN' && 
+                                  {item.percentage != null && 
                                        
                                           <Progress.Circle style={{position: 'absolute', top: 10, right: 10, flex: 1, justifyContent: 'center', alignItems: 'center'}} color={'#55c583'} progress={item.percentage} size={50} />
                                 }
@@ -222,7 +215,7 @@ export default class SearchScreen extends Component<Props>{
         )
     } else {
         return(
-            <ScrollView style={{flex: 1}}>
+            <ScrollView style={{flex: 1}} ref="searchScrollView">
             
               {this._renderSearch()}
 

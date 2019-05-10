@@ -61,7 +61,7 @@ export default class SettingsScreen extends Component<Props>{
         enablePagination: true,
         offlineMode: false
 	    };
-	    console.log("this props settings", this.props)
+	    //console.log("this props settings", this.props)
 	    
 	  }
 	  componentDidMount() {
@@ -74,12 +74,12 @@ export default class SettingsScreen extends Component<Props>{
 					          	gender: resp.gender,
                       roles: resp.roles,
 					          	allowPushNotifications: resp.allow_push_notifications,
-                      offlineMode: resp.offline_mde,
+                      offlineMode: resp.offline_mode,
                       enablePagination: resp.enable_pagination
 					          })
 					        })
 					        .catch(err => {
-					          console.log("There's no settings in!", err)
+					          //console.log("There's no settings in!", err)
 					        })
            API.getSession((err, response) => {
               console.log("Getting session", response)
@@ -90,9 +90,9 @@ export default class SettingsScreen extends Component<Props>{
                 } else {
                   API.getUser(response.userCtx.name).then(res => {
 
-                    console.log("Get user from API", res)
+                    //console.log("Get user from API", res)
                     APILocalSettings.upsert('UserSettings', doc => {
-                     console.log("User settings logged", res.nombre, doc)
+                     //console.log("User settings logged", res.nombre, doc)
                       
                         doc.logged_in = true;
                         doc.username = res.name;
@@ -100,6 +100,8 @@ export default class SettingsScreen extends Component<Props>{
                         doc.gender = res.gender;
                         doc.roles = res.roles;
                         doc.allow_push_notifications = res.allow_push_notifications;
+                        doc.enable_pagination = res.enable_pagination;
+                        doc.offline_mode = res.offline_mode;
                       
                       return doc;
                     }).then((res) => {
@@ -113,7 +115,7 @@ export default class SettingsScreen extends Component<Props>{
 	  }
 	  _onLogout = () => {
 
-	  	console.log("Log out Settings!", this.props)
+	  	//console.log("Log out Settings!", this.props)
          
           this.props.screenProps.onLogout();
     
@@ -141,7 +143,7 @@ export default class SettingsScreen extends Component<Props>{
         negativeButtonTitle={Languages.Cancel[getLang()]}
         positiveButtonTitle={Languages.Save[getLang()]}
         onValueChange={value => {
-          console.log("username:", value);
+          //console.log("username:", value);
           /*db.changeUsername('spiderman', 'batman', function(err) {
 				  if (err) {
 				    if (err.name === 'not_found') {
@@ -311,7 +313,7 @@ export default class SettingsScreen extends Component<Props>{
       <SettingsSwitch
         title={Languages.enablePagination[getLang()]}
         onValueChange={value => {
-          console.log("enable pagination:", value);
+          //console.log("enable pagination:", value);
           APILocalSettings.upsert('UserSettings', doc => {
                       if (doc.logged_in) {
                         doc.enable_pagination = value;
@@ -320,24 +322,24 @@ export default class SettingsScreen extends Component<Props>{
                     }).then((res) => {
                       APILocalSettings.get('UserSettings')
                   .then(resp => {
-                    console.log("Settings of user!", resp);
+                    //console.log("Settings of user!", resp);
                     API.putUser(resp.username, {
                   metadata : {
                     enable_pagination: resp.enable_pagination
                   }
                 }).then((response) => {
                   // etc.
-                  console.log("Respuesta save api", response)
+                  //console.log("Respuesta save api", response)
                 }).catch((err) => {
                   console.log("Respuesta saveeeeee error!", err)
                 });
                   })
                   .catch(err => {
-                    console.log("There's no user logged in!", err)
+                    //console.log("There's no user logged in!", err)
                   })
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("User settings error on saving", error)
+                      //console.log("User settings error on saving", error)
                       // error
                     });
           this.setState({
@@ -354,7 +356,7 @@ export default class SettingsScreen extends Component<Props>{
        <SettingsSwitch
         title={Languages.offlineMode[getLang()]}
         onValueChange={value => {
-          console.log("enable offline mode:", value);
+          //console.log("enable offline mode:", value);
           APILocalSettings.upsert('UserSettings', doc => {
                       if (doc.logged_in) {
                         doc.offline_mode = value;
@@ -363,24 +365,24 @@ export default class SettingsScreen extends Component<Props>{
                     }).then((res) => {
                       APILocalSettings.get('UserSettings')
                   .then(resp => {
-                    console.log("Settings of user!", resp);
+                    //console.log("Settings of user!", resp);
                     API.putUser(resp.username, {
                   metadata : {
                     offline_mode: resp.offline_mode
                   }
                 }).then((response) => {
                   // etc.
-                  console.log("Respuesta save api", response)
+                  //console.log("Respuesta save api", response)
                 }).catch((err) => {
-                  console.log("Respuesta saveeeeee error!", err)
+                  //console.log("Respuesta saveeeeee error!", err)
                 });
                   })
                   .catch(err => {
-                    console.log("There's no user logged in!", err)
+                    //console.log("There's no user logged in!", err)
                   })
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("User settings error on saving", error)
+                      //console.log("User settings error on saving", error)
                       // error
                     });
           this.setState({

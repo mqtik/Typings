@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Dimensions, ListView, Animated, TouchableHighlight } from 'react-native';
+import {Platform, StyleSheet, Text, TextInput, ActivityIndicator, View, Button, Alert, TouchableOpacity, Image, ImageBackground, ScrollView, StatusBar, SafeAreaView, Dimensions, ListView, Animated, TouchableHighlight, RefreshControl } from 'react-native';
 import Icon from 'react-native-fa-icons';
 import Icono from 'react-native-vector-icons/Ionicons';
 import EntypoIcono from 'react-native-vector-icons/Entypo';
@@ -40,7 +40,8 @@ export default class CreatorsScreen extends Component<Props>{
          exist: 'false',
          isLoading: true,
          listType: Languages.Drafts[getLang()],
-         docs: null
+         docs: null,
+         refreshing: false
       }
 
      
@@ -50,14 +51,17 @@ export default class CreatorsScreen extends Component<Props>{
    componentDidMount(){
      this._renderDrafts();
    }
+   _onRefresh = () => {
+    this.setState({refreshing: true});
+    this._renderDrafts();
+  }
 
    _renderDrafts = () => {
           APILocalDrafts.allDocs({
             include_docs: true,
             attachments: true
           }).then(result => {
-            console.log("ALL CREATORS DOCS")
-            console.log(result);
+            
             let books = result.rows.map(function (row) { return row.doc; });  
             let booksNow = _.filter(books, function(item){
                             return item.archive == false
@@ -66,10 +70,10 @@ export default class CreatorsScreen extends Component<Props>{
                             return item.archive == true
                          });
                         
-            this.setState({docs: booksNow, archive: booksArchived, isLoading: false})
-            console.log("books archived!", booksArchived)
+            this.setState({docs: booksNow, archive: booksArchived, isLoading: false, refreshing: false})
+            
           }).catch(err => {
-            console.log(err);
+            //console.log(err);
           
           });
    }
@@ -86,18 +90,16 @@ export default class CreatorsScreen extends Component<Props>{
 
                       APILocalDrafts.get(bookId)
                         .then(resp => {
-                          console.log("New book", resp);
-
                          this.setState({title_book: null, docs: this.state.docs.concat([resp])})
                         })
                         .catch(err => {
-                          console.log("Error getting the new book", err)
+                          //console.log("Error getting the new book", err)
                         })
 
 
                       // success, res is {rev: '1-xxx', updated: true, id: 'myDocId'}
                     }).catch((error) => {
-                      console.log("Error creating book", error)
+                      //console.log("Error creating book", error)
                       // error
                     });
   }
@@ -110,13 +112,13 @@ export default class CreatorsScreen extends Component<Props>{
   }
 
   _onEdit = (id, title) => {
-      console.log("Title id", id, title)
+      
       APILocalDrafts.upsert(id, doc => {
                       doc.title = title;
                       return doc;
                     }).then((res) => {
                         
-                        console.log("Changed!", res) 
+                        //console.log("Changed!", res) 
                         this._renderDrafts();
                         this.setState({color: '#36ca41'});
                         this.refs.toast.show('The title has been changed', 2000);
@@ -124,14 +126,14 @@ export default class CreatorsScreen extends Component<Props>{
                     }).catch((error) => {
                         this.setState({color: 'red'});
                         this.refs.toast.show('Something went wrong', 2000);
-                      console.log("Error creating book", error)
+                      //console.log("Error creating book", error)
                       // error
                     });
   }
  
   _onDelete = (book, section) => {
       let books;
-      console.log("section!", section)
+      //console.log("section!", section)
       if(section == Languages.Drafts[getLang()]){
           books = this.state.docs;
         } else if (section == Languages.Archive[getLang()]) {
@@ -145,10 +147,9 @@ export default class CreatorsScreen extends Component<Props>{
                 text: 'Delete', 
                   onPress: () => {
                     APILocalDrafts.get(book._id).then((doc) => {
-                      console.log("doc!", doc)
+                      
                       
                       if(section == Languages.Drafts[getLang()]){
-                        console.log("deleting")
                         let newData = [...this.state.docs];
                         let prevIndex = this.state.docs.findIndex(item => item._id === book._id);
                         newData.splice(prevIndex, 1);
@@ -176,7 +177,6 @@ export default class CreatorsScreen extends Component<Props>{
 
    _onArchive = (book, section) => {
       let books;
-      console.log("section!", section)
       if(section == Languages.Drafts[getLang()]){
           books = this.state.docs;
         } else if (section == Languages.Archive[getLang()]) {
@@ -188,24 +188,18 @@ export default class CreatorsScreen extends Component<Props>{
                       return doc;
                     }).then((res) => {
 
-                        console.log("section!")
                       if(section == Languages.Drafts[getLang()]){
-                        console.log("Drafting")
                         let newData = [...this.state.docs];
                         let prevIndex = this.state.docs.findIndex(item => item._id === book._id);
                         newData.splice(prevIndex, 1);
                           this.setState({docs: newData});
-                          console.log("This state docs!", this.state.docs);
                         } else if (section == Languages.Archive[getLang()]) {
-                          console.log("Archiving")
                           let newData = [...this.state.archive];
                           let prevIndex = this.state.archive.findIndex(item => item._id === book._id);
                           newData.splice(prevIndex, 1);
                           this.setState({archive: newData});
-                          console.log("This state archive!", this.state.archive)
                         }
                         this._renderDrafts()
-                        console.log("Fire renderMessage() on archive")
                         this.forceUpdate()
                     });
   }
@@ -216,7 +210,6 @@ export default class CreatorsScreen extends Component<Props>{
     } else if (this.state.listType == Languages.Archive[getLang()]) {
       books = this.state.archive;
     } 
-    console.log("check if none", books.length)
 
     if(books.length == 0){
       return (
@@ -256,7 +249,15 @@ export default class CreatorsScreen extends Component<Props>{
           </View>
         
         </View>
-            <ScrollView style={{backgroundColor: '#222', height: alto}}>
+            <ScrollView 
+               style={{backgroundColor: '#222', height: alto}}
+               refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh}
+                  />
+                }
+            >
             {this._checkIfNone()}
 
             <View style={styles.container}>
@@ -267,7 +268,8 @@ export default class CreatorsScreen extends Component<Props>{
                 <SwipeRow
                   leftOpenValue={75}
                   rightOpenValue={-75}
-
+                  onScrollEnabled={false}
+                  closeOnScroll={false}
                 >
 
                   <View style={styles.standaloneRowBack}>
@@ -398,11 +400,11 @@ const styles = StyleSheet.create({
   },
   standaloneRowFront: {
     alignItems: 'flex-end',
-    backgroundColor: '#555',
+    backgroundColor: '#333',
     justifyContent: 'flex-end',
     height: 100,
     borderRadius: 10,
-    shadowColor: '#4b2a69',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
     shadowRadius: 1,  
